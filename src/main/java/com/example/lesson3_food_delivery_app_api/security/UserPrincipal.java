@@ -1,5 +1,6 @@
 package com.example.lesson3_food_delivery_app_api.security;
 
+import com.example.lesson3_food_delivery_app_api.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,7 +15,19 @@ import java.util.Collections;
 public class UserPrincipal implements UserDetails {
 
     private String email;
+    private String password;
     private String role;
+
+    public UserPrincipal(User user) {
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.role = user.getRole().name();
+    }
+
+    public UserPrincipal(String email, String role) {
+        this.email = email;
+        this.role = role;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -23,7 +36,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @Override

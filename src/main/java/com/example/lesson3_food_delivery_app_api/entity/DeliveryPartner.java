@@ -5,23 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Menu {
+public class DeliveryPartner {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    @JoinColumn(name = "menu_id", referencedColumnName = "id")
-    private List<Food> foods;
-
-    @OneToOne(mappedBy = "menu")
-    private Restaurant restaurant;
 }
