@@ -35,6 +35,16 @@ public class Order {
     @OneToOne(fetch = FetchType.LAZY)
     private DeliveryPartner deliveryPartner;
 
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    private Restaurant restaurant;
+
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    private Customer customer;
+
     public Long getFoodId() {
         return food.getId();
     }
@@ -44,6 +54,9 @@ public class Order {
         return deliveryPartner.getId();
     }
 
+    public Long getRestaurantId() {
+        return restaurant.getId();
+    }
     public double getPrice() {
         return food.getPrice() * quantity;
     }

@@ -1,5 +1,6 @@
 package com.example.lesson3_food_delivery_app_api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,4 +32,12 @@ public class Food {
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<Comment> comments;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Restaurant restaurant;
+
+    public Long getRestaurantId() {
+        return restaurant.getId();
+    }
 }

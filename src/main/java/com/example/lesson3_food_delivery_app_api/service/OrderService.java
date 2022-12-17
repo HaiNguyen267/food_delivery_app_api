@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class OrderService {
+
     @Autowired
     private OrderRepository orderRepository;
 
-    public Order getOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+    public void saveOrder(Order order) {
+        orderRepository.save(order);
     }
 }

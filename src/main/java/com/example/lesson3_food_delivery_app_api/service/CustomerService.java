@@ -3,7 +3,9 @@ package com.example.lesson3_food_delivery_app_api.service;
 import com.example.lesson3_food_delivery_app_api.dto.request.CustomerRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.FoodCommentRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.FoodRatingRequest;
+import com.example.lesson3_food_delivery_app_api.dto.request.OrderFoodRequest;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.OrderFoodResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.*;
 import com.example.lesson3_food_delivery_app_api.exception.RatingInvalidException;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -35,6 +38,9 @@ public class CustomerService {
 
     @Autowired
     private RestaurantService restaurantService;
+
+    @Autowired
+    private OrderService orderService;
 
     public ResponseEntity<?> register(CustomerRegistrationRequest customerRegistrationRequest) {
         String name = customerRegistrationRequest.getName();
@@ -75,7 +81,7 @@ public class CustomerService {
     }
 
     public ResponseEntity<?> commentFood(String userEmail, FoodCommentRequest foodCommentRequest) {
-        Food food = foodService.getFood(foodCommentRequest.getFoodId());
+        Food food = foodService.getFoodById(foodCommentRequest.getFoodId());
 
         Customer customer = getCustomerByEmail(userEmail);
         // to be able to comment, the customer must have ordered the food
@@ -103,7 +109,7 @@ public class CustomerService {
 
 
     public ResponseEntity<?> rateFood(String currentCustomerEmail, FoodRatingRequest foodRatingRequest) {
-        Food food = foodService.getFood(foodRatingRequest.getFoodId());
+        Food food = foodService.getFoodById(foodRatingRequest.getFoodId());
 
         Customer customer = getCustomerByEmail(currentCustomerEmail);
         // to be able to rate, the customer must have ordered the food
@@ -133,5 +139,35 @@ public class CustomerService {
 
     private boolean checkIfUserHasOrderedFood(Customer customer, Food food) {
         return customer.getOrders().stream().anyMatch(order -> order.getFoodId().equals(food.getId()));
+    }
+
+    public ResponseEntity<?> orderFood(String currentCustomerEmail, OrderFoodRequest orderFoodRequest) {
+
+        Customer customer = getCustomerByEmail(currentCustomerEmail);
+
+        Food food = foodService.getFoodById(orderFoodRequest.getFoodId());
+        Restaurant restaurant = food.getRestaurant();
+
+        long now = new Date().getTime();
+        Order order = Order.builder()
+                .food(food)
+                .customer(customer)
+                .restaurant(restaurant)
+                .orderTime(new Date(now))
+                .quantity(orderFoodRequest.getQuantity())
+                .build();
+
+        orderService.saveOrder(order);
+
+        OrderFoodResponse orderFoodResponse = OrderFoodResponse.builder()
+                .foodName(food.getName())
+                .orderId(order.getId())
+                .foodId(order.getFoodId())
+                .restaurantId(order.getRestaurantId())
+                .quantity(order.getQuantity())
+                .price(order.getPrice())
+                .build();
+
+        return ResponseEntity.ok(orderFoodResponse);
     }
 }

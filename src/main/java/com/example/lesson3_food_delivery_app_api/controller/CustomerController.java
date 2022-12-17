@@ -3,8 +3,10 @@ package com.example.lesson3_food_delivery_app_api.controller;
 import com.example.lesson3_food_delivery_app_api.dto.request.FoodCommentRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.CustomerRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.FoodRatingRequest;
+import com.example.lesson3_food_delivery_app_api.dto.request.OrderFoodRequest;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.RegisterResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.Customer;
 import com.example.lesson3_food_delivery_app_api.entity.Food;
 import com.example.lesson3_food_delivery_app_api.entity.Restaurant;
@@ -107,18 +109,77 @@ public class CustomerController {
     public ResponseEntity<?> getRestaurantMenu(@PathVariable long restaurantId) {
         return customerService.getRestaurantMenu(restaurantId);
     }
-
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Customer ordered food succesfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = List.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Restaurant id not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @PostMapping("/orderFood")
+    public ResponseEntity<?> orderFood(@RequestBody OrderFoodRequest orderFoodRequest) {
+        String currentCustomerEmail = getCurrentCustomer().getEmail();
+        return customerService.orderFood(currentCustomerEmail, orderFoodRequest);
+    }
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Customer commented food successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SuccessResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Customer has not ordered this food yet",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
     @PostMapping("/commentFood")
     public ResponseEntity<?> commentFood(@RequestBody FoodCommentRequest foodCommentRequest) {
         String currentCustomerEmail = getCurrentCustomer().getEmail();
         return customerService.commentFood(currentCustomerEmail, foodCommentRequest);
     }
 
+
     private Customer getCurrentCustomer() {
         return (Customer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
 
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Customer rated food successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SuccessResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Customer has not ordered this food yet",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
     @PostMapping("/rateFood")
     public ResponseEntity<?> rateFood(@RequestBody FoodRatingRequest foodRatingRequest) {
         String currentCustomerEmail = getCurrentCustomer().getEmail();

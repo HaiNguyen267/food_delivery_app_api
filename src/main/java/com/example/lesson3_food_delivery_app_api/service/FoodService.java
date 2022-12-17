@@ -3,7 +3,6 @@ package com.example.lesson3_food_delivery_app_api.service;
 import com.example.lesson3_food_delivery_app_api.entity.Food;
 import com.example.lesson3_food_delivery_app_api.repository.FoodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,7 +25,7 @@ public class FoodService {
         return foodRepository.findAll();
     }
 
-    public Food getFood(Long foodId) {
+    public Food getFoodById(Long foodId) {
         // TODO: use NotFoundException to use ControllerAdvice
         return foodRepository.findById(foodId).orElseThrow(() -> new RuntimeException("Food not found"));
     }
