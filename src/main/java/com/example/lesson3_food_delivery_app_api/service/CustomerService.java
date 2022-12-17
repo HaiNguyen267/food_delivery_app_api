@@ -11,7 +11,6 @@ import com.example.lesson3_food_delivery_app_api.exception.UserHasNotOrderedFood
 import com.example.lesson3_food_delivery_app_api.repository.CustomerRepository;
 import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
 import com.example.lesson3_food_delivery_app_api.security.Role;
-import org.springdoc.api.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
