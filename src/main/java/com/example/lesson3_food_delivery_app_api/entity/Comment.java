@@ -20,5 +20,9 @@ public class Comment {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
+    private Customer user; // the customer who wrote the comment
+
+    public String getUser() {
+        return user.getName();
+    }
 }

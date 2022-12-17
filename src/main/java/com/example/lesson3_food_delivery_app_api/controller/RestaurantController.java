@@ -1,7 +1,10 @@
 package com.example.lesson3_food_delivery_app_api.controller;
 
 import com.example.lesson3_food_delivery_app_api.dto.request.RestaurantRegistrationRequest;
-import com.example.lesson3_food_delivery_app_api.dto.response.*;
+import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.GetOrdersResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.RegisterResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.Food;
 import com.example.lesson3_food_delivery_app_api.entity.Menu;
 import com.example.lesson3_food_delivery_app_api.entity.Order;

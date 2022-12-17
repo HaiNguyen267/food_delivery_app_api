@@ -11,7 +11,9 @@ import com.example.lesson3_food_delivery_app_api.entity.Order;
 import com.example.lesson3_food_delivery_app_api.entity.Restaurant;
 import com.example.lesson3_food_delivery_app_api.jwt.JwtProvider;
 import com.example.lesson3_food_delivery_app_api.repository.RestaurantRepository;
+import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
 import com.example.lesson3_food_delivery_app_api.security.Role;
+import org.springdoc.api.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.lesson3_food_delivery_app_api.dto.response.GetOrdersResponse.*;
 
@@ -39,6 +42,9 @@ public class RestaurantService {
     private FoodService foodService;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private OrderService orderService;
 
     public ResponseEntity<?> register(RestaurantRegistrationRequest registrationRequest) {
@@ -48,7 +54,7 @@ public class RestaurantService {
         String phone = registrationRequest.getPhone();
         String name = registrationRequest.getName();
 
-        if (restaurantRepository.existsByEmailIgnoreCase(restaurantEmail)) {
+        if (userRepository.existsByEmailIgnoreCase(restaurantEmail)) {
             return ResponseEntity.badRequest().body("Email already registered");
         }
 
@@ -64,9 +70,7 @@ public class RestaurantService {
 
         restaurant = restaurantRepository.save(restaurant);
 
-        String accessToken = JwtProvider.generateToken(restaurant);
-        RegisterResponse loginResponse = new RegisterResponse(accessToken);
-        return ResponseEntity.ok().body(loginResponse);
+        return AuthService.createResponseWithAccessToken(restaurant);
     }
 
     public ResponseEntity<?> addMenu(String restaurantEmail, Menu menu) {
@@ -166,5 +170,22 @@ public class RestaurantService {
     private boolean checkIfOrderExistsInOrderList(Long orderId, Restaurant restaurant) {
         return restaurant.getOrders().stream()
                 .anyMatch(order -> order.getId().equals(orderId));
+    }
+
+    public List<Restaurant> getAllRestaurants() {
+        return restaurantRepository.findAll();
+    }
+
+    public ResponseEntity<?> getRestaurantMenu(long restaurantId) {
+
+        Optional<Restaurant> optionalRestaurant = restaurantRepository.findById(restaurantId);
+
+        if (optionalRestaurant.isEmpty()) {
+            ErrorResponse response = new ErrorResponse("Restaurant not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        Menu menu = optionalRestaurant.get().getMenu();
+        return ResponseEntity.ok().body(menu);
     }
 }
