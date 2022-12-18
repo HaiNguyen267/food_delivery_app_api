@@ -13,6 +13,7 @@ import com.example.lesson3_food_delivery_app_api.jwt.JwtProvider;
 import com.example.lesson3_food_delivery_app_api.repository.RestaurantRepository;
 import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
 import com.example.lesson3_food_delivery_app_api.security.Role;
+import lombok.AllArgsConstructor;
 import org.springdoc.api.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,25 +28,20 @@ import java.util.Optional;
 import static com.example.lesson3_food_delivery_app_api.dto.response.GetOrdersResponse.*;
 
 @Service
+@AllArgsConstructor
 public class RestaurantService {
 
-    @Autowired
-    private RestaurantRepository restaurantRepository;
+    private final RestaurantRepository restaurantRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private MenuService menuService;
+    private final MenuService menuService;
 
-    @Autowired
-    private FoodService foodService;
+    private final FoodService foodService;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
     public ResponseEntity<?> register(RestaurantRegistrationRequest registrationRequest) {
         String restaurantEmail = registrationRequest.getEmail();

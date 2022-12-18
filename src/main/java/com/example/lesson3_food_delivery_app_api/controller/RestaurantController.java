@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,10 +25,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/restaurant")
+@AllArgsConstructor
 public class RestaurantController {
 
-    @Autowired
-    private RestaurantService restaurantService;
+
+    private final RestaurantService restaurantService;
 
     @Operation(summary = "Register a new restaurant")
     @ApiResponses(value = {

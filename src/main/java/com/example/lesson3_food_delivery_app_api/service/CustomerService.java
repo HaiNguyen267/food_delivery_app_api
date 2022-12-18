@@ -13,34 +13,31 @@ import com.example.lesson3_food_delivery_app_api.exception.UserHasNotOrderedFood
 import com.example.lesson3_food_delivery_app_api.repository.CustomerRepository;
 import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
 import com.example.lesson3_food_delivery_app_api.security.Role;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class CustomerService {
 
-    @Autowired
-    private CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private FoodService foodService;
+    private final FoodService foodService;
 
-    @Autowired
-    private RestaurantService restaurantService;
+    private final RestaurantService restaurantService;
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
     public ResponseEntity<?> register(CustomerRegistrationRequest customerRegistrationRequest) {
         String name = customerRegistrationRequest.getName();
@@ -153,7 +150,7 @@ public class CustomerService {
                 .food(food)
                 .customer(customer)
                 .restaurant(restaurant)
-                .orderTime(new Date(now))
+                .orderTime(LocalDateTime.now())
                 .quantity(orderFoodRequest.getQuantity())
                 .build();
 
@@ -169,5 +166,10 @@ public class CustomerService {
                 .build();
 
         return ResponseEntity.ok(orderFoodResponse);
+    }
+
+    public List<?> getFoodComments(Long foodId) {
+        Food food = foodService.getFoodById(foodId);
+        return food.getComments();
     }
 }

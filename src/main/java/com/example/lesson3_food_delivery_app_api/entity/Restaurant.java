@@ -16,6 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Restaurant extends User {
+    // TODO: customer can see comments of a restaurant
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

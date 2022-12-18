@@ -7,6 +7,7 @@ import com.example.lesson3_food_delivery_app_api.entity.User;
 import com.example.lesson3_food_delivery_app_api.exception.WrongUsernamePasswordException;
 import com.example.lesson3_food_delivery_app_api.jwt.JwtProvider;
 import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,13 +16,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class AuthService {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public ResponseEntity<?> login(LoginRequest loginRequest) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken

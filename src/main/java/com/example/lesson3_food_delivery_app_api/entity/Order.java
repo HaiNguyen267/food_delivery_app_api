@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Entity
@@ -16,6 +20,11 @@ import java.util.Date;
 @Builder
 @Data
 public class Order {
+
+    public static enum OrderStatus {
+         READY, DELIVERING, DELIVERED
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,9 +32,14 @@ public class Order {
     // TODO: admin can view an order
     private int quantity;
     private double price;
-    private Date orderTime;
-    private Date deliveryTime;
-    private boolean isDelivered;
+    private LocalDateTime orderTime; // when the customer order the food
+    private LocalDateTime deliveryTime; // when the order is delivered to customer
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    @Transient
+    private long totalDeliveringTime;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
@@ -62,15 +76,17 @@ public class Order {
     }
 
     public String getOrderTime() {
-        return parseDate(orderTime);
+       return orderTime.toString();
     }
 
     public String getDeliveryTime() {
-        return parseDate(deliveryTime);
+        return deliveryTime.toString();
     }
 
-    public static String parseDate(Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        return formatter.format(date);
+    public long getTotalDeliveringTime() {
+        // calculate the total minutes from orderTime to deliveryTime
+        long minutes = ChronoUnit.MINUTES.between(orderTime, deliveryTime);
+        return minutes;
     }
+
 }

@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Food {
-
+    // TODO: customer can see comments of a food
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,6 +30,7 @@ public class Food {
     @OneToMany(cascade = CascadeType.ALL)
     private List<Rating> ratings;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     private List<Comment> comments;
 
@@ -39,5 +40,17 @@ public class Food {
 
     public Long getRestaurantId() {
         return restaurant.getId();
+    }
+
+    public double getRating() {
+        return ratings.stream()
+                .map(Rating::getRating)
+                .mapToInt(Integer::intValue)
+                .average()
+                .orElse(0);
+    }
+
+    public int numberOfComment() {
+        return comments.size();
     }
 }

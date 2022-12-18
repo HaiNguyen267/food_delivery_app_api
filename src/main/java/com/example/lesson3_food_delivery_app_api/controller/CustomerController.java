@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,10 +25,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/customer")
+@AllArgsConstructor
 public class CustomerController {
 
-    @Autowired
-    private CustomerService customerService;
+    private final CustomerService customerService;
 
 
 
@@ -132,6 +133,31 @@ public class CustomerController {
         String currentCustomerEmail = getCurrentCustomer().getEmail();
         return customerService.orderFood(currentCustomerEmail, orderFoodRequest);
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "View food comments successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = List.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Food not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("/foodComment/{foodId}")
+    public List<?> getFoodComments(@PathVariable Long foodId) {
+        return customerService.getFoodComments(foodId);
+    }
+
+
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
