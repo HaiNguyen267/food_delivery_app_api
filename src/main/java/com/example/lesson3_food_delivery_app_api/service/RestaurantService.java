@@ -3,26 +3,21 @@ package com.example.lesson3_food_delivery_app_api.service;
 import com.example.lesson3_food_delivery_app_api.dto.request.RestaurantRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.GetOrdersResponse;
-import com.example.lesson3_food_delivery_app_api.dto.response.RegisterResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.*;
-import com.example.lesson3_food_delivery_app_api.jwt.JwtProvider;
+import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
 import com.example.lesson3_food_delivery_app_api.repository.RestaurantRepository;
 import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
-import com.example.lesson3_food_delivery_app_api.security.Role;
 import lombok.AllArgsConstructor;
-import org.springdoc.api.ErrorMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.lesson3_food_delivery_app_api.dto.response.GetOrdersResponse.*;
+import static com.example.lesson3_food_delivery_app_api.dto.response.GetOrdersResponse.OrderDTO;
 
 @Service
 @AllArgsConstructor
@@ -30,13 +25,9 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
 
-    private final PasswordEncoder passwordEncoder;
-
     private final MenuService menuService;
 
     private final FoodService foodService;
-
-    private final UserRepository userRepository;
 
     private final OrderService orderService;
 
@@ -65,7 +56,7 @@ public class RestaurantService {
     }
 
     private Restaurant getRestaurantByEmail(String restaurantEmail) {
-        return restaurantRepository.findByEmail(restaurantEmail)
+        return (Restaurant) restaurantRepository.findByEmail(restaurantEmail)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found"));
     }
 
@@ -177,8 +168,8 @@ public class RestaurantService {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
 
-        Menu menu = optionalRestaurant.get().getMenu();
-        return ResponseEntity.ok().body(menu);
+        Restaurant restaurant = (Restaurant) optionalRestaurant.get();
+        return ResponseEntity.ok().body(restaurant.getMenu());
     }
 
     public ResponseEntity<?> getMenu(String restaurantEmail) {
@@ -196,8 +187,7 @@ public class RestaurantService {
     }
 
     private Restaurant getRestaurantById(long restaurantId) {
-        //TODO: NOT FOUND EXCEPTION
-        return restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+        return (Restaurant) restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new NotFoundException("Restaurant not found"));
     }
 }

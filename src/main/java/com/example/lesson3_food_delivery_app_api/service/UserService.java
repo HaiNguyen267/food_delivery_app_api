@@ -6,8 +6,10 @@ import com.example.lesson3_food_delivery_app_api.dto.request.CustomerRegistratio
 import com.example.lesson3_food_delivery_app_api.dto.request.DeliveryPartnerRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.RestaurantRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.LoginResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.*;
+import com.example.lesson3_food_delivery_app_api.exception.WrongUsernamePasswordException;
 import com.example.lesson3_food_delivery_app_api.repository.*;
 import com.example.lesson3_food_delivery_app_api.security.Role;
 import lombok.AllArgsConstructor;
@@ -137,7 +139,7 @@ public class UserService {
         deliveryPartner = deliveryPartnerRepository.save(deliveryPartner);
         eventLogService.saveEventLog(EventLog.Event.REGISTER, deliveryPartner.getId());
         SuccessResponse response = new SuccessResponse("Delivery partner registered successfully");
-        return ResponseEntity.ok(response);
+        return AuthService.createResponseWithAccessToken(deliveryPartner);
     }
 
 
@@ -186,8 +188,20 @@ public class UserService {
         return user.isLocked();
     }
 
-    private User getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         return userRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new WrongUsernamePasswordException("Wrong username or password"));
     }
+
+    public void resetLoginFailAttemptCount(String userEmail) {
+        User user = getUserByEmail(userEmail);
+        user.setAccessFailedCount(0);
+        saveUser(user);
+    }
+
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+
+
 }

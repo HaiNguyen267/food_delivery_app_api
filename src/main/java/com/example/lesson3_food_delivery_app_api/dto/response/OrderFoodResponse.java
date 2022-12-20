@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderFoodResponse {
     private Long foodId;
-    private Long restaurantId;
+    private String restaurantName;
     private Long orderId;
     private String foodName;
     private int quantity;

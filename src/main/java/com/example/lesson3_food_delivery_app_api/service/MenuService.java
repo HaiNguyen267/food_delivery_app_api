@@ -29,6 +29,7 @@ public class MenuService {
     public void editFood(Long foodId, Food newFood, Menu menu) {
 
         for (Food food : menu.getFoods()) {
+            //TODO:  check if new fields are not null
             if (food.getId() == foodId) {
                 food.setName(newFood.getName());
                 food.setPrice(newFood.getPrice());

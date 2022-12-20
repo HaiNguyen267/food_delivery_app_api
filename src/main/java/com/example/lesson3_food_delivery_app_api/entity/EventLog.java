@@ -1,11 +1,13 @@
 package com.example.lesson3_food_delivery_app_api.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Data
@@ -18,6 +20,7 @@ public class EventLog {
         REGISTER,
         LOGIN,
         LOGIN_FAILED,
+        BRUTE_FORCE,
 
         // restaurant
         EDIT_MENU,
@@ -45,6 +48,11 @@ public class EventLog {
 
     private LocalDateTime time;
 
+    public String getTime() {
+        return time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    @JsonIgnore
     @ManyToOne
     private User user;
 }

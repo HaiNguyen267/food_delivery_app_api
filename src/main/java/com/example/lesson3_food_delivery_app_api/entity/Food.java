@@ -36,9 +36,13 @@ public class Food {
     private List<Comment> comments = new ArrayList<>();
 
     @JsonIgnore
-    @ManyToOne()
+    @ManyToOne
     private Menu menu;
 
+
+    private Long getRestaurantId() {
+        return menu.getRestaurant().getId();
+    }
     @JsonIgnore
     public Long getMenuId() {
         return menu.getId();

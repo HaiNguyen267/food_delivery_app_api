@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -52,12 +53,13 @@ public class DeliveryPartnerService {
         }
 
         order.setStatus(OrderStatus.DELIVERING);
+        order.setDeliveryPartner(deliveryPartner);
         orderService.saveOrder(order);
 
         deliveryPartner.getDeliveringOrders().add(order);
         deliveryPartner = deliveryPartnerRepository.save(deliveryPartner);
         eventLogService.saveEventLog(EventLog.Event.DELIVERY_ORDER, deliveryPartner.getId());
-        return ResponseEntity.ok(new SuccessResponse("Order delivered successfully"));
+        return ResponseEntity.ok(new SuccessResponse("Order is being delivered"));
     }
 
     @Transactional
@@ -74,6 +76,7 @@ public class DeliveryPartnerService {
         }
 
         order.setStatus(OrderStatus.DELIVERED);
+        order.setDeliveryTime(LocalDateTime.now());
         orderService.saveOrder(order);
 
         deliveryPartner.getDeliveringOrders().remove(order);
@@ -81,7 +84,7 @@ public class DeliveryPartnerService {
         deliveryPartner = deliveryPartnerRepository.save(deliveryPartner);
 
         eventLogService.saveEventLog(EventLog.Event.FINISH_DELIVERY, deliveryPartner.getId());
-        return ResponseEntity.ok(new SuccessResponse("Order delivered successfully"));
+        return ResponseEntity.ok(new SuccessResponse("Order is delivered successfully"));
     }
 
     private DeliveryPartner getDeliveryPartnerByEmail(String currentDeliveryPartnerEmail) {
@@ -94,6 +97,11 @@ public class DeliveryPartnerService {
     }
 
     public List<?> getAllDeliveryOrder(long deliveryPartnerId) {
-        return deliveryPartnerRepository.findAllOrdersByStatus(deliveryPartnerId, EnumSet.of(OrderStatus.READY, OrderStatus.DELIVERING));
+        return deliveryPartnerRepository.findAllOrdersByStatus(deliveryPartnerId, EnumSet.of(OrderStatus.DELIVERING, OrderStatus.DELIVERED));
+    }
+
+    public ResponseEntity<?> getDeliveringOrders(String currentDeliveryPartnerEmail) {
+        DeliveryPartner deliveryPartner = getDeliveryPartnerByEmail(currentDeliveryPartnerEmail);
+        return ResponseEntity.ok(deliveryPartner.getDeliveringOrders());
     }
 }

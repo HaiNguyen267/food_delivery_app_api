@@ -6,8 +6,10 @@ import com.example.lesson3_food_delivery_app_api.dto.response.RegisterResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.Customer;
 import com.example.lesson3_food_delivery_app_api.entity.Food;
+import com.example.lesson3_food_delivery_app_api.entity.Order;
 import com.example.lesson3_food_delivery_app_api.entity.Restaurant;
 import com.example.lesson3_food_delivery_app_api.service.CustomerService;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -77,10 +79,9 @@ public class CustomerController {
             )
     )
     @GetMapping("/viewAllRestaurants")
-    public List<Restaurant> viewAllRestaurants() {
+    public List<?> viewAllRestaurants() {
         return customerService.viewAllRestaurants();
     }
-
 
 
     @ApiResponses(value = {
@@ -105,6 +106,7 @@ public class CustomerController {
     public ResponseEntity<?> getRestaurantMenu(@PathVariable long restaurantId) {
         return customerService.getRestaurantMenu(restaurantId);
     }
+
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -152,6 +154,29 @@ public class CustomerController {
         return customerService.getFoodComments(foodId);
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Get orders successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Order.class))
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Customer has not ordered this food yet",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("/myOrders")
+    public List<?> getOrders() {
+        String currentCustomerEmail = getCurrentCustomer().getUsername();
+        return customerService.getOrders(currentCustomerEmail);
+    }
 
     @ApiResponses(value = {
             @ApiResponse(
@@ -176,6 +201,7 @@ public class CustomerController {
         String currentCustomerEmail = getCurrentCustomer().getUsername();
         return customerService.commentFood(currentCustomerEmail, foodCommentRequest);
     }
+
 
 
     private UserDetails getCurrentCustomer() {

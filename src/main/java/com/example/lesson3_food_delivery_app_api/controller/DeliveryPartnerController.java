@@ -9,6 +9,7 @@ import com.example.lesson3_food_delivery_app_api.entity.DeliveryPartner;
 import com.example.lesson3_food_delivery_app_api.entity.Order;
 import com.example.lesson3_food_delivery_app_api.service.DeliveryPartnerService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -71,6 +72,7 @@ public class DeliveryPartnerController {
     }
 
 
+
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -103,6 +105,25 @@ public class DeliveryPartnerController {
         return deliveryPartnerService.deliverOrder(currentDeliveryPartnerEmail, orderId);
     }
 
+
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Get delivering orders successfully",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = Order.class))
+
+                            )
+                    }
+            )
+
+    })
+    @GetMapping("/viewDeliveringOrders")
+    public ResponseEntity<?> getDeliveringOrders() {
+        String currentDeliveryPartnerEmail = getCurrentDeliveryPartner().getUsername();
+        return deliveryPartnerService.getDeliveringOrders(currentDeliveryPartnerEmail);
+    }
 
     @ApiResponses(value = {
             @ApiResponse(

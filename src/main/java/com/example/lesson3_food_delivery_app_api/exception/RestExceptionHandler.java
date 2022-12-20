@@ -17,7 +17,7 @@ public class RestExceptionHandler {
             WrongUsernamePasswordException.class,
             InvalidJWTTokenException.class
     })
-    public ResponseEntity<?> handleException(Exception e) {
+    public ResponseEntity<?> handleException(RuntimeException e) {
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return ResponseEntity.badRequest().body(response);
     }

@@ -30,7 +30,10 @@ public class Order{
 
     // TODO: admin can view an order
     private int quantity;
+
+    @Transient
     private double price;
+
     @Column
     private LocalDateTime orderTime; // when the customer order the food
     @Column
@@ -60,17 +63,19 @@ public class Order{
     @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
 
-    public Long getFoodId() {
-        return food.getId();
+
+
+    public String getFoodName() {
+        return food.getName();
     }
 
-    public Long getDeliveryPartnerId() {
-        if (deliveryPartner == null) return null;
-        return deliveryPartner.getId();
+    public String getDeliveryPartnerName() {
+        if (deliveryPartner == null) return null; // if the order is not assigned to a delivery partner yet
+        return deliveryPartner.getName();
     }
 
-    public Long getRestaurantId() {
-        return restaurant.getId();
+    public String getRestaurantName() {
+        return restaurant.getName();
     }
 
     public double getPrice() {
@@ -86,11 +91,12 @@ public class Order{
         return deliveryTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
 
-//    public long getTotalDeliveringTime() {
-//        // calculate the total minutes from orderTime to deliveryTime
-//        long minutes = ChronoUnit.MINUTES.between(orderTime, deliveryTime);
-//        return minutes;
-//    }
+    @JsonIgnore
+    public long getTotalDeliveringTime() {
+        // calculate the total minutes from orderTime to deliveryTime
+        long minutes = ChronoUnit.MINUTES.between(orderTime, deliveryTime);
+        return minutes;
+    }
 
 
 }

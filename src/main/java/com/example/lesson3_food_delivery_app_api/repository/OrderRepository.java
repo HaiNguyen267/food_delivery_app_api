@@ -12,4 +12,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o WHERE o.status = 'READY'")
     List<Order> findReadyOrders();
+
+    @Query("SELECT o FROM Order o WHERE o.customer.email = ?1 AND o.status <> 'DELIVERED'")
+    List<Order> findUnDeliveredOrdersOfCustomer(String currentCustomerEmail);
+
 }

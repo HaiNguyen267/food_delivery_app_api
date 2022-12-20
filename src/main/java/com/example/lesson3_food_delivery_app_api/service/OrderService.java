@@ -1,6 +1,7 @@
 package com.example.lesson3_food_delivery_app_api.service;
 
 import com.example.lesson3_food_delivery_app_api.entity.Order;
+import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
 import com.example.lesson3_food_delivery_app_api.repository.OrderRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +20,15 @@ public class OrderService {
     }
 
     public Order getOrderById(Long orderId) {
-        // TODO: handle order not found
-        return orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        return orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
     }
 
     public List<Order> getReadyOrders() {
         List<Order> readyOrders = orderRepository.findReadyOrders(); // find all orders which are ready to be delivered
         return readyOrders;
+    }
+
+    public List<?> findUnDeliveredOrdersOfCustomer(String currentCustomerEmail) {
+        return orderRepository.findUnDeliveredOrdersOfCustomer(currentCustomerEmail);
     }
 }

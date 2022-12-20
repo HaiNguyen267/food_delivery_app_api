@@ -34,9 +34,12 @@ public class User {
     @Enumerated(EnumType.STRING)
     protected Role role;
 
+    @JsonIgnore
     private long accessFailedCount; // 0 - 5, lock user after 5 failed attempts
+    @JsonIgnore
     private boolean isLocked;
 
+    @JsonIgnore
     @OneToMany(cascade =  {CascadeType.PERSIST, CascadeType.REMOVE}, mappedBy = "user")
     private List<EventLog> eventLogs;
 }

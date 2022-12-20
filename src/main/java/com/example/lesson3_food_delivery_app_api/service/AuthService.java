@@ -34,7 +34,6 @@ public class AuthService {
 
 
         Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-        //TODO: handle locekd user case
         if (authentication.isAuthenticated()) {
             User user = userRepository.findByEmail(loginRequest.getUsername()).get();
 
@@ -43,6 +42,7 @@ public class AuthService {
             eventLogService.saveEventLog(EventLog.Event.LOGIN, user.getId());
             return createResponseWithAccessToken(user);
         } else {
+            System.out.println("wrong username and password message");
             throw new WrongUsernamePasswordException("Wrong username or password");
         }
     }

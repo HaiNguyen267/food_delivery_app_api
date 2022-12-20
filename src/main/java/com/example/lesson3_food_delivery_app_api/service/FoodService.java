@@ -1,6 +1,7 @@
 package com.example.lesson3_food_delivery_app_api.service;
 
 import com.example.lesson3_food_delivery_app_api.entity.Food;
+import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
 import com.example.lesson3_food_delivery_app_api.repository.FoodRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,6 @@ public class FoodService {
 
     public Food getFoodById(Long foodId) {
         // TODO: use NotFoundException to use ControllerAdvice
-        return foodRepository.findById(foodId).orElseThrow(() -> new RuntimeException("Food not found"));
+        return foodRepository.findById(foodId).orElseThrow(() -> new NotFoundException("Food not found"));
     }
 }

@@ -23,8 +23,8 @@ public class GetOrdersResponse {
         public OrderDTO(Order order) {
             this.id = order.getId();
             this.price = order.getPrice();
-            this.foodId = order.getFoodId();
-            this.deliveryPartnerId = order.getDeliveryPartnerId();
+            this.foodId = order.getFood().getId();
+            this.deliveryPartnerId = order.getDeliveryPartner().getId();
             this.status = order.getStatus().name();
         }
     }

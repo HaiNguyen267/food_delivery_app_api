@@ -8,6 +8,7 @@ import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.OrderFoodResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.*;
+import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
 import com.example.lesson3_food_delivery_app_api.exception.RatingInvalidException;
 import com.example.lesson3_food_delivery_app_api.exception.UserHasNotOrderedFoodException;
 import com.example.lesson3_food_delivery_app_api.repository.CustomerRepository;
@@ -115,7 +116,7 @@ public class CustomerService {
     }
 
     private boolean checkIfUserHasOrderedFood(Customer customer, Food food) {
-        return customer.getOrders().stream().anyMatch(order -> order.getFoodId().equals(food.getId()));
+        return customer.getOrders().stream().anyMatch(order -> order.getFood().getId().equals(food.getId()));
     }
 
     @Transactional
@@ -137,14 +138,13 @@ public class CustomerService {
                 .build();
 
         restaurant.getOrders().add(order);
-        restaurantService.saveRestaurant(restaurant);
         orderService.saveOrder(order);
 
         OrderFoodResponse orderFoodResponse = OrderFoodResponse.builder()
                 .foodName(food.getName())
                 .orderId(order.getId())
-                .foodId(order.getFoodId())
-                .restaurantId(order.getRestaurantId())
+                .foodId(order.getFood().getId())
+                .restaurantName(order.getRestaurantName())
                 .quantity(order.getQuantity())
                 .price(order.getPrice())
                 .build();
@@ -170,8 +170,11 @@ public class CustomerService {
     }
 
     private Customer getCustomerById(long customerId) {
-        return customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
+        return customerRepository.findById(customerId).orElseThrow(() -> new NotFoundException("Customer not found"));
     }
 
 
+    public List<?> getOrders(String currentCustomerEmail) {
+        return orderService.findUnDeliveredOrdersOfCustomer(currentCustomerEmail);
+    }
 }
