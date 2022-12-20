@@ -29,7 +29,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/login", "/signin").permitAll()
-                .antMatchers("/restaurant/register", "/customer/register", "/delivery-partner/register", "/swagger-ui/**" ,"/v3/**").permitAll()
+                .antMatchers("/restaurant/register", "/customer/register", "/delivery-partner/register", "/admin/register").permitAll()
+                .antMatchers("/swagger-ui/**" ,"/v3/**").permitAll() // swagger
                 .antMatchers("/restaurant/**").hasAuthority("ROLE_RESTAURANT")
                 .antMatchers("/customer/**").hasAuthority("ROLE_CUSTOMER")
                 .antMatchers("/delivery-partner/**").hasAuthority("ROLE_DELIVERY_PARTNER")

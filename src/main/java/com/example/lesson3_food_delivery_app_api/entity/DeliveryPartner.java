@@ -15,8 +15,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DeliveryPartner extends User{
-    // TODO: finish this class
+public class DeliveryPartner extends User {
+    // TODO: finish this class, return null for delivery time    when there is no order
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

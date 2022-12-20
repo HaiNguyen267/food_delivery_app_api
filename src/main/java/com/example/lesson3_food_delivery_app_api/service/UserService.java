@@ -60,7 +60,7 @@ public class UserService {
         }
 
         userRepository.save(user);
-        SuccessResponse successResponse = new SuccessResponse(String.format("User %sed successfully", user.getEmail(), operation.name().toLowerCase()));
+        SuccessResponse successResponse = new SuccessResponse(String.format("User %s %sed successfully", user.getEmail(), operation.name().toLowerCase()));
         return ResponseEntity.ok(successResponse);
     }
 
@@ -76,6 +76,7 @@ public class UserService {
         Admin admin = new Admin();
         admin.setEmail(email);
         admin.setPassword(passwordEncoder.encode(password));
+        admin.setRole(Role.ADMIN);
         admin = adminRepository.save(admin);
 
         return AuthService.createResponseWithAccessToken(admin);

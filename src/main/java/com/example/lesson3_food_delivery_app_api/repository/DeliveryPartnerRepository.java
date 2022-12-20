@@ -16,6 +16,6 @@ public interface DeliveryPartnerRepository extends JpaRepository<DeliveryPartner
 
     Optional<DeliveryPartner> findByEmailIgnoreCase(String currentDeliveryPartnerEmail);
 
-    @Query("SELECT o FROM Order o WHERE o.deliveryPartner.id = :deliveryPartnerId AND o.status IN :orderStatuses")
+    @Query("SELECT o FROM Order o WHERE o.deliveryPartner.id = :deliveryPartnerId AND o.status IN :statuses")
     List<?> findAllOrdersByStatus(long deliveryPartnerId, EnumSet<OrderStatus> statuses);
 }

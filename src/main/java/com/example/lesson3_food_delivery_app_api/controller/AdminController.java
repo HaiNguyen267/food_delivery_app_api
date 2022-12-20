@@ -144,7 +144,7 @@ public class AdminController {
                     }
             )
     })
-    @GetMapping("/getAllOrders/{restaurantId}")
+    @GetMapping("/getRestaurantOrders/{restaurantId}")
     public List<?> getAllRestaurantOrder(@PathVariable long restaurantId) {
         return adminService.getRestaurantOrders(restaurantId);
     }

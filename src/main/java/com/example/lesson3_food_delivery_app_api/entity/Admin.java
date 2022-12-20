@@ -10,7 +10,6 @@ import javax.persistence.Table;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @Data
 public class Admin extends User{
