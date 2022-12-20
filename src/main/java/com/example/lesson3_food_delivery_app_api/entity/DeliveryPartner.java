@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,12 +26,12 @@ public class DeliveryPartner extends User{
     private double deliveryTimeAverage;
 
     @JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Order> deliveredOrders;
+    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    private List<Order> deliveredOrders = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Order> deliveringOrders;
+    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    private List<Order> deliveringOrders = new ArrayList<>();
 
 
     public double getDeliveryTimeAverage() {

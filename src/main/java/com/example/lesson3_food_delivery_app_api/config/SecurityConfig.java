@@ -29,7 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/login", "/signin").permitAll()
-                .antMatchers("/restaurant/register").permitAll()
+                .antMatchers("/restaurant/register", "/customer/register", "/delivery-partner/register", "/swagger-ui/**" ,"/v3/**").permitAll()
                 .antMatchers("/restaurant/**").hasAuthority("ROLE_RESTAURANT")
                 .antMatchers("/customer/**").hasAuthority("ROLE_CUSTOMER")
                 .antMatchers("/delivery-partner/**").hasAuthority("ROLE_DELIVERY_PARTNER")
@@ -40,13 +40,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.addFilterAfter(new JwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
-
-        auth.userDetailsService(customUserDetailsService)
-                .passwordEncoder(passwordEncoder());
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

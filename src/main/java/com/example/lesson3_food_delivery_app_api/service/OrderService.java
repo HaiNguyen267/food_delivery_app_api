@@ -20,7 +20,7 @@ public class OrderService {
 
     public Order getOrderById(Long orderId) {
         // TODO: handle order not found
-        return orderRepository.findById(orderId).orElse(null);
+        return orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
     }
 
     public List<Order> getReadyOrders() {

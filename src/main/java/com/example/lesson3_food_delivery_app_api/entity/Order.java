@@ -11,19 +11,18 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Entity
+@Table(name = "orders") // cannot name it 'order' because it is a reserved word in SQL
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
-public class Order {
+public class Order{
 
-    public static enum OrderStatus {
-         READY, DELIVERING, DELIVERED
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +31,9 @@ public class Order {
     // TODO: admin can view an order
     private int quantity;
     private double price;
+    @Column
     private LocalDateTime orderTime; // when the customer order the food
+    @Column
     private LocalDateTime deliveryTime; // when the order is delivered to customer
 
     @Enumerated(EnumType.STRING)
@@ -46,17 +47,17 @@ public class Order {
     private Food food;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private DeliveryPartner deliveryPartner;
 
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Restaurant restaurant;
 
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
 
     public Long getFoodId() {
@@ -71,22 +72,25 @@ public class Order {
     public Long getRestaurantId() {
         return restaurant.getId();
     }
+
     public double getPrice() {
         return food.getPrice() * quantity;
     }
 
     public String getOrderTime() {
-       return orderTime.toString();
+       return orderTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
 
     public String getDeliveryTime() {
-        return deliveryTime.toString();
+        if (deliveryTime == null) return null;
+        return deliveryTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
 
-    public long getTotalDeliveringTime() {
-        // calculate the total minutes from orderTime to deliveryTime
-        long minutes = ChronoUnit.MINUTES.between(orderTime, deliveryTime);
-        return minutes;
-    }
+//    public long getTotalDeliveringTime() {
+//        // calculate the total minutes from orderTime to deliveryTime
+//        long minutes = ChronoUnit.MINUTES.between(orderTime, deliveryTime);
+//        return minutes;
+//    }
+
 
 }

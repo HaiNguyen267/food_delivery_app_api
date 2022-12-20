@@ -24,8 +24,13 @@ public class AuthService {
     private final UserRepository userRepository;
 
     public ResponseEntity<?> login(LoginRequest loginRequest) {
+        String username = loginRequest.getUsername();
+        String password = loginRequest.getPassword();
+
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
+                = new UsernamePasswordAuthenticationToken(username, password);
+
+
         Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
         if (authentication.isAuthenticated()) {

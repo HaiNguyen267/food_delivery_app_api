@@ -14,13 +14,14 @@ import com.example.lesson3_food_delivery_app_api.repository.CustomerRepository;
 import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
 import com.example.lesson3_food_delivery_app_api.security.Role;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 
 @Service
@@ -88,7 +89,8 @@ public class CustomerService {
 
         Comment comment = Comment.builder()
                 .content(foodCommentRequest.getComment())
-                .user(customer)
+                .customer(customer)
+                .food(food)
                 .build();
 
 
@@ -114,12 +116,13 @@ public class CustomerService {
             throw new UserHasNotOrderedFoodException("You have to order this food before rating");
         }
 
-        if (isRatingValid(foodRatingRequest.getRating())) {
+        if (!isRatingValid(foodRatingRequest.getRating())) {
             throw new RatingInvalidException("Rating must be between 1 and 5");
         }
 
         Rating rating = Rating.builder()
                 .rating(foodRatingRequest.getRating())
+                .food(food)
                 .build();
 
         food.getRatings().add(rating);
@@ -138,22 +141,26 @@ public class CustomerService {
         return customer.getOrders().stream().anyMatch(order -> order.getFoodId().equals(food.getId()));
     }
 
+    @Transactional
     public ResponseEntity<?> orderFood(String currentCustomerEmail, OrderFoodRequest orderFoodRequest) {
 
         Customer customer = getCustomerByEmail(currentCustomerEmail);
 
         Food food = foodService.getFoodById(orderFoodRequest.getFoodId());
-        Restaurant restaurant = food.getRestaurant();
+        Restaurant restaurant = food.getMenu().getRestaurant();
 
         long now = new Date().getTime();
         Order order = Order.builder()
                 .food(food)
                 .customer(customer)
                 .restaurant(restaurant)
+                .status(OrderStatus.READY)
                 .orderTime(LocalDateTime.now())
                 .quantity(orderFoodRequest.getQuantity())
                 .build();
 
+        restaurant.getOrders().add(order);
+        restaurantService.saveRestaurant(restaurant);
         orderService.saveOrder(order);
 
         OrderFoodResponse orderFoodResponse = OrderFoodResponse.builder()
@@ -172,4 +179,21 @@ public class CustomerService {
         Food food = foodService.getFoodById(foodId);
         return food.getComments();
     }
+
+    public List<?> getAllCustomers() {
+        return customerRepository.findAll();
+    }
+
+    public List<?> findAllUnDeliveredOrders(long customerId) {
+        // check if customer exists
+        Customer customer = getCustomerById(customerId);
+
+        return customerRepository.findAllDeliveryByStatus(customerId,  EnumSet.of(OrderStatus.READY, OrderStatus.DELIVERING)); // find ready or delivering orders that belong to the customer
+    }
+
+    private Customer getCustomerById(long customerId) {
+        return customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
+    }
+
+
 }

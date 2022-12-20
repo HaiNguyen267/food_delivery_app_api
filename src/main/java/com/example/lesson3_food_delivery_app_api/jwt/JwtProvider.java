@@ -24,6 +24,7 @@ public class JwtProvider {
         String role = user.getRole().name();
 
         Map<String, String> claims = Map.of("email", email, "role", role);
+
         Date expiredDate = new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_INTERVAL);
         String token = Jwts.builder()
                 .setSubject(email)

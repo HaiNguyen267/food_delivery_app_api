@@ -43,6 +43,7 @@ public class RestaurantService {
 
     private final OrderService orderService;
 
+
     public ResponseEntity<?> register(RestaurantRegistrationRequest registrationRequest) {
         String restaurantEmail = registrationRequest.getEmail();
         String password = registrationRequest.getPassword();
@@ -70,13 +71,17 @@ public class RestaurantService {
     }
 
     public ResponseEntity<?> addMenu(String restaurantEmail, Menu menu) {
-        Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
-        menuService.saveMenu(menu);
-        restaurant.setMenu(menu);
+//        System.out.println("jihi");
 
+        Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
+
+        menu.getFoods().forEach(food -> food.setMenu(menu)); // food is the owning side in the bidirectional relationship with menu
+
+        restaurant.setMenu(menu); // restaurant is the owning side in the bidirectional relationship with menu
         restaurantRepository.save(restaurant);
+
         SuccessResponse response = new SuccessResponse("Menu added successfully");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(menu);
     }
 
     private Restaurant getRestaurantByEmail(String restaurantEmail) {
@@ -110,6 +115,15 @@ public class RestaurantService {
             return ResponseEntity.badRequest().body(message);
         }
 
+        // there is a bidirectional relationship between menu and food that prevents Hibernate from deleting the food
+        // remove the bidirectional relationship, so that Hibernate can delete the food from database
+        Food food = foodService.getFoodById(foodId);
+        Menu menu = food.getMenu();
+
+        menu.getFoods().remove(food); // menu now doesn't have the food
+        food.setMenu(null); // the food now loses the reference to the menu
+
+        menuService.saveMenu(menu);
         foodService.deleteFoodById(foodId);
 
         SuccessResponse message = new SuccessResponse("Food deleted successfully");
@@ -126,11 +140,12 @@ public class RestaurantService {
         if (restaurant.getMenu() == null) {
             Menu menu = new Menu();
             menu.getFoods().add(food);
-
             restaurant.setMenu(menu);
+        } else {
+            restaurant.getMenu().getFoods().add(food);
         }
 
-        restaurant.getMenu().getFoods().add(food);
+        food.setMenu(restaurant.getMenu());
 
         restaurantRepository.save(restaurant);
         SuccessResponse message = new SuccessResponse("Food added successfully");
@@ -139,7 +154,6 @@ public class RestaurantService {
 
     public ResponseEntity<?> getOrders(String restaurantEmail) {
         Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
-
         List<Order> orders = restaurant.getOrders();
 
         List<OrderDTO> orderDTOs = orders.stream()
@@ -183,5 +197,25 @@ public class RestaurantService {
 
         Menu menu = optionalRestaurant.get().getMenu();
         return ResponseEntity.ok().body(menu);
+    }
+
+    public ResponseEntity<?> getMenu(String restaurantEmail) {
+        Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
+        return ResponseEntity.ok().body(restaurant.getMenu());
+    }
+
+    public void saveRestaurant(Restaurant restaurant) {
+        restaurantRepository.save(restaurant);
+    }
+
+    public List<?> getRestaurantOrders(long restaurantId) {
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        return restaurant.getOrders();
+    }
+
+    private Restaurant getRestaurantById(long restaurantId) {
+        //TODO: NOT FOUND EXCEPTION
+        return restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
     }
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -27,22 +28,27 @@ public class Food {
     private String description;
     private String imageUrl;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Rating> ratings;
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "food")
+    private List<Rating> ratings = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Comment> comments;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "food")
+    private List<Comment> comments = new ArrayList<>();
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Restaurant restaurant;
+    @ManyToOne()
+    private Menu menu;
 
-    public Long getRestaurantId() {
-        return restaurant.getId();
+    @JsonIgnore
+    public Long getMenuId() {
+        return menu.getId();
     }
 
-    public double getRating() {
+    public Double getRating() {
+        if (ratings.size() == 0) {
+            return null;
+        }
         return ratings.stream()
                 .map(Rating::getRating)
                 .mapToInt(Integer::intValue)
@@ -52,5 +58,16 @@ public class Food {
 
     public int numberOfComment() {
         return comments.size();
+    }
+
+    @Override
+    public String toString() {
+        return "Food{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", description='" + description + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                '}';
     }
 }

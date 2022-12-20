@@ -19,7 +19,7 @@ public class FoodService {
 
     }
 
-    public void deleteFoodById(Long foodId) {
+    public void deleteFoodById(long foodId) {
         foodRepository.deleteById(foodId);
     }
 

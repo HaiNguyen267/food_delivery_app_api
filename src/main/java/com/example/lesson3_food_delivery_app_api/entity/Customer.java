@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,6 +24,6 @@ public class Customer extends User {
     private String address;
 
     @JsonIgnore
-    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private List<Order> orders;
+    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, mappedBy = "customer")
+    private List<Order> orders = new ArrayList<>();
 }

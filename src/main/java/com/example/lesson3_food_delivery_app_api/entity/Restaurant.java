@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -17,7 +18,7 @@ import java.util.List;
 @Builder
 public class Restaurant extends User {
     // TODO: customer can see comments of a restaurant
-
+    //TODO: log events
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,7 +32,7 @@ public class Restaurant extends User {
     private Menu menu;
 
     @JsonIgnore
-    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private List<Order> orders;
+    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, mappedBy = "restaurant")
+    private List<Order> orders = new ArrayList<>();
 
 }

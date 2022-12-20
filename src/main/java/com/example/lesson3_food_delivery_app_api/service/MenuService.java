@@ -21,7 +21,7 @@ public class MenuService {
     @Transactional
     public Menu saveMenu(Menu menu) {
         for (Food food : menu.getFoods()) {
-            foodService.saveFood(food);
+            food.setMenu(menu);
         }
         return menuRepository.save(menu);
     }

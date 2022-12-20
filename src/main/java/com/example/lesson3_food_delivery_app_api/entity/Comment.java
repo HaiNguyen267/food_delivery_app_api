@@ -1,5 +1,6 @@
 package com.example.lesson3_food_delivery_app_api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,10 +20,11 @@ public class Comment {
 
     private String content;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    private Customer user; // the customer who wrote the comment
+    private Customer customer; // the customer who wrote the comment
 
-    public String getUser() {
-        return user.getName();
-    }
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Food food;
 }

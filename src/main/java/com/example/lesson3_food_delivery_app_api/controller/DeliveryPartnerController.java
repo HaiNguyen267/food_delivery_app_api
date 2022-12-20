@@ -5,6 +5,7 @@ import com.example.lesson3_food_delivery_app_api.dto.request.RestaurantRegistrat
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.RegisterResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
+import com.example.lesson3_food_delivery_app_api.entity.DeliveryPartner;
 import com.example.lesson3_food_delivery_app_api.entity.Order;
 import com.example.lesson3_food_delivery_app_api.service.DeliveryPartnerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -96,8 +99,10 @@ public class DeliveryPartnerController {
     })
     @PostMapping("/deliverOrder/{orderId}")
     public ResponseEntity<?> deliverOrder(@PathVariable Long orderId) {
-        return deliveryPartnerService.deliverOrder(orderId);
+        String currentDeliveryPartnerEmail = getCurrentDeliveryPartner().getUsername();
+        return deliveryPartnerService.deliverOrder(currentDeliveryPartnerEmail, orderId);
     }
+
 
     @ApiResponses(value = {
             @ApiResponse(
@@ -127,8 +132,14 @@ public class DeliveryPartnerController {
     })
     @PostMapping("/finishDelivery/{orderId}")
     public ResponseEntity<?> finishDelivery(@PathVariable Long orderId) {
-        return deliveryPartnerService.finishDelivery(orderId);
+        String currentDeliveryPartnerEmail = getCurrentDeliveryPartner().getUsername();
+        return deliveryPartnerService.finishDelivery(currentDeliveryPartnerEmail, orderId);
     }
+
+    private UserDetails getCurrentDeliveryPartner() {
+        return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
 
 
 }

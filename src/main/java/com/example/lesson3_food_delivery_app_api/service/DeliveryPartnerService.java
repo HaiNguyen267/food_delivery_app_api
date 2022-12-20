@@ -5,15 +5,16 @@ import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.DeliveryPartner;
 import com.example.lesson3_food_delivery_app_api.entity.Order;
+import com.example.lesson3_food_delivery_app_api.entity.OrderStatus;
 import com.example.lesson3_food_delivery_app_api.exception.OrderDeliveringException;
 import com.example.lesson3_food_delivery_app_api.repository.DeliveryPartnerRepository;
 import com.example.lesson3_food_delivery_app_api.security.Role;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -55,38 +56,53 @@ public class DeliveryPartnerService {
         return readyOrders;
     }
 
-    public ResponseEntity<?> deliverOrder(Long orderId) {
+    @Transactional
+    public ResponseEntity<?> deliverOrder(String currentDeliveryPartnerEmail, Long orderId) {
+        DeliveryPartner deliveryPartner = getDeliveryPartnerByEmail(currentDeliveryPartnerEmail);
         Order order = orderService.getOrderById(orderId);
 
-        if (order.getStatus() == Order.OrderStatus.DELIVERED) {
+        if (order.getStatus() == OrderStatus.DELIVERED) {
             throw new OrderDeliveringException("Order is already delivered");
         }
 
-        if (order.getStatus() == Order.OrderStatus.DELIVERING) {
-            throw new OrderDeliveringException("Order is already being delivered");
+        if (order.getStatus() == OrderStatus.DELIVERING) {
+            throw new OrderDeliveringException("Order is already being delivering");
         }
 
-        order.setStatus(Order.OrderStatus.DELIVERING);
+        order.setStatus(OrderStatus.DELIVERING);
         orderService.saveOrder(order);
+
+        deliveryPartner.getDeliveringOrders().add(order);
+        deliveryPartnerRepository.save(deliveryPartner);
 
         return ResponseEntity.ok(new SuccessResponse("Order delivered successfully"));
     }
 
-    public ResponseEntity<?> finishDelivery(Long orderId) {
-
+    @Transactional
+    public ResponseEntity<?> finishDelivery(String currentDeliveryPartnerEmail, Long orderId) {
+        DeliveryPartner deliveryPartner = getDeliveryPartnerByEmail(currentDeliveryPartnerEmail);
         Order order = orderService.getOrderById(orderId);
 
-        if (order.getStatus() == Order.OrderStatus.DELIVERED) {
+        if (order.getStatus() == OrderStatus.DELIVERED) {
             throw new OrderDeliveringException("Order is already delivered");
         }
 
-        if (order.getStatus() == Order.OrderStatus.READY) {
+        if (order.getStatus() == OrderStatus.READY) {
             throw new OrderDeliveringException("Order is not being delivered");
         }
 
-        order.setStatus(Order.OrderStatus.DELIVERED);
+        order.setStatus(OrderStatus.DELIVERED);
         orderService.saveOrder(order);
 
+        deliveryPartner.getDeliveringOrders().remove(order);
+        deliveryPartner.getDeliveredOrders().add(order);
+        deliveryPartnerRepository.save(deliveryPartner);
+
         return ResponseEntity.ok(new SuccessResponse("Order delivered successfully"));
+    }
+
+    private DeliveryPartner getDeliveryPartnerByEmail(String currentDeliveryPartnerEmail) {
+        return deliveryPartnerRepository.findByEmailIgnoreCase(currentDeliveryPartnerEmail)
+                .orElseThrow(() -> new RuntimeException("Delivery partner not found"));
     }
 }

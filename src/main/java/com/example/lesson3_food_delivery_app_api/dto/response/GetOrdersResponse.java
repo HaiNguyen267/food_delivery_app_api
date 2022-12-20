@@ -23,9 +23,9 @@ public class GetOrdersResponse {
         public OrderDTO(Order order) {
             this.id = order.getId();
             this.price = order.getPrice();
-            this.foodId = order.getFood().getId();
+            this.foodId = order.getFoodId();
             this.deliveryPartnerId = order.getDeliveryPartnerId();
-            this.status = order.isDelivered() ? "Delivered" : "Not delivered";
+            this.status = order.getStatus().name();
         }
     }
 

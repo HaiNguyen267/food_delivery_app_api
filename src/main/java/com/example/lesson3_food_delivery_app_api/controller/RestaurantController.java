@@ -28,8 +28,8 @@ import org.springframework.web.server.ResponseStatusException;
 @AllArgsConstructor
 public class RestaurantController {
 
-
-    private final RestaurantService restaurantService;
+    @Autowired
+    private RestaurantService restaurantService;
 
     @Operation(summary = "Register a new restaurant")
     @ApiResponses(value = {
@@ -71,9 +71,8 @@ public class RestaurantController {
     public ResponseEntity<?> addMenu(@RequestBody Menu menu) {
         // get email of current logged in restaurant email
         String email = getCurrentRestaurant().getUsername();
+        System.out.println("email: " + email);
         return restaurantService.addMenu(email, menu);
-
-
     }
 
     private UserDetails getCurrentRestaurant() {
@@ -138,6 +137,7 @@ public class RestaurantController {
     @DeleteMapping("/deleteFood/{foodId}")
     public ResponseEntity<?> deleteFood(@PathVariable Long foodId) {
         String email = getCurrentRestaurant().getUsername();
+        System.out.println("foodId = " + foodId);;
         return restaurantService.deleteFood(email,foodId);
     }
 
@@ -178,6 +178,24 @@ public class RestaurantController {
     }
 
 
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Get menu successfully",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            name = "SuccessResponse",
+                                            value = "Get order successfully"),
+                                    schema = @Schema(implementation = Menu.class))
+                    }
+            )
+    })
+    @GetMapping("/menu")
+    public ResponseEntity<?> getMenu() {
+        String email = getCurrentRestaurant().getUsername();
+        return restaurantService.getMenu(email);
+    }
 
     @ApiResponses(value = {
             @ApiResponse(

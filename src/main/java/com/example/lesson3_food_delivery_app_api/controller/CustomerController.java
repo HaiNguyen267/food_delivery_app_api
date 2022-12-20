@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,10 +28,8 @@ import java.util.List;
 @RequestMapping("/customer")
 @AllArgsConstructor
 public class CustomerController {
-
+    //TODO: log events
     private final CustomerService customerService;
-
-
 
     @ApiResponses(value = {
             @ApiResponse(
@@ -130,7 +129,7 @@ public class CustomerController {
     })
     @PostMapping("/orderFood")
     public ResponseEntity<?> orderFood(@RequestBody OrderFoodRequest orderFoodRequest) {
-        String currentCustomerEmail = getCurrentCustomer().getEmail();
+        String currentCustomerEmail = getCurrentCustomer().getUsername();
         return customerService.orderFood(currentCustomerEmail, orderFoodRequest);
     }
 
@@ -152,7 +151,7 @@ public class CustomerController {
                     )
             )
     })
-    @GetMapping("/foodComment/{foodId}")
+    @GetMapping("/viewFoodComment/{foodId}")
     public List<?> getFoodComments(@PathVariable Long foodId) {
         return customerService.getFoodComments(foodId);
     }
@@ -178,13 +177,13 @@ public class CustomerController {
     })
     @PostMapping("/commentFood")
     public ResponseEntity<?> commentFood(@RequestBody FoodCommentRequest foodCommentRequest) {
-        String currentCustomerEmail = getCurrentCustomer().getEmail();
+        String currentCustomerEmail = getCurrentCustomer().getUsername();
         return customerService.commentFood(currentCustomerEmail, foodCommentRequest);
     }
 
 
-    private Customer getCurrentCustomer() {
-        return (Customer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    private UserDetails getCurrentCustomer() {
+        return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
 
@@ -208,7 +207,7 @@ public class CustomerController {
     })
     @PostMapping("/rateFood")
     public ResponseEntity<?> rateFood(@RequestBody FoodRatingRequest foodRatingRequest) {
-        String currentCustomerEmail = getCurrentCustomer().getEmail();
+        String currentCustomerEmail = getCurrentCustomer().getUsername();
         return customerService.rateFood(currentCustomerEmail, foodRatingRequest);
     }
 }

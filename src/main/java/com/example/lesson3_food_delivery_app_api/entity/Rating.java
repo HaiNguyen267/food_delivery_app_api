@@ -1,14 +1,12 @@
 package com.example.lesson3_food_delivery_app_api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Data
@@ -22,4 +20,7 @@ public class Rating {
 
     private int rating;
 
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Food food;
 }
