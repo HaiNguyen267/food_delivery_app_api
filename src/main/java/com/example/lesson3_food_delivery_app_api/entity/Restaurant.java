@@ -17,8 +17,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Restaurant extends User {
-    // TODO: customer can see comments of a restaurant
-    //TODO: log events
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

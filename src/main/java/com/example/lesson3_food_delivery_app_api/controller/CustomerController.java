@@ -25,7 +25,6 @@ import java.util.List;
 @RequestMapping("/customer")
 @AllArgsConstructor
 public class CustomerController {
-    //TODO: log events
     private final CustomerService customerService;
 
     @ApiResponses(value = {

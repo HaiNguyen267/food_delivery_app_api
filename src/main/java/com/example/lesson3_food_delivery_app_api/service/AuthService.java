@@ -3,7 +3,9 @@ package com.example.lesson3_food_delivery_app_api.service;
 import com.example.lesson3_food_delivery_app_api.dto.request.LoginRequest;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.LoginResponse;
+import com.example.lesson3_food_delivery_app_api.entity.EventLog;
 import com.example.lesson3_food_delivery_app_api.entity.User;
+import com.example.lesson3_food_delivery_app_api.exception.UserLockedException;
 import com.example.lesson3_food_delivery_app_api.exception.WrongUsernamePasswordException;
 import com.example.lesson3_food_delivery_app_api.jwt.JwtProvider;
 import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
@@ -20,7 +22,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
-
+    private final EventLogService eventLogService;
     private final UserRepository userRepository;
 
     public ResponseEntity<?> login(LoginRequest loginRequest) {
@@ -36,10 +38,12 @@ public class AuthService {
         if (authentication.isAuthenticated()) {
             User user = userRepository.findByEmail(loginRequest.getUsername()).get();
 
+            if (user.isLocked()) throw new UserLockedException("Account is locked");
+
+            eventLogService.saveEventLog(EventLog.Event.LOGIN, user.getId());
             return createResponseWithAccessToken(user);
         } else {
-            ErrorResponse errorResponse = new ErrorResponse("Wrong username or password");
-            return ResponseEntity.badRequest().body(errorResponse);
+            throw new WrongUsernamePasswordException("Wrong username or password");
         }
     }
 

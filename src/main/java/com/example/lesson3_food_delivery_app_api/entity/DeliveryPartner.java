@@ -16,14 +16,13 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class DeliveryPartner extends User {
-    // TODO: finish this class, return null for delivery time    when there is no order
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
-    private double deliveryTimeAverage;
+    private Double deliveryTimeAverage;
 
     @JsonIgnore
     @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
@@ -34,7 +33,11 @@ public class DeliveryPartner extends User {
     private List<Order> deliveringOrders = new ArrayList<>();
 
 
-    public double getDeliveryTimeAverage() {
+    public Double getDeliveryTimeAverage() {
+        // if there is no orders delivered, return null
+        if (deliveredOrders.size() == 0) {
+            return null;
+        }
         return deliveredOrders.stream()
                 .map(Order::getTotalDeliveringTime)
                 .mapToDouble(Long::doubleValue)

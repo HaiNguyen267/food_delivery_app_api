@@ -5,10 +5,7 @@ import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.GetOrdersResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.RegisterResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
-import com.example.lesson3_food_delivery_app_api.entity.Food;
-import com.example.lesson3_food_delivery_app_api.entity.Menu;
-import com.example.lesson3_food_delivery_app_api.entity.Order;
-import com.example.lesson3_food_delivery_app_api.entity.Restaurant;
+import com.example.lesson3_food_delivery_app_api.entity.*;
 import com.example.lesson3_food_delivery_app_api.jwt.JwtProvider;
 import com.example.lesson3_food_delivery_app_api.repository.RestaurantRepository;
 import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
@@ -43,31 +40,12 @@ public class RestaurantService {
 
     private final OrderService orderService;
 
+    private final EventLogService eventLogService;
+
+    private final UserService userService;
 
     public ResponseEntity<?> register(RestaurantRegistrationRequest registrationRequest) {
-        String restaurantEmail = registrationRequest.getEmail();
-        String password = registrationRequest.getPassword();
-        String address = registrationRequest.getAddress();
-        String phone = registrationRequest.getPhone();
-        String name = registrationRequest.getName();
-
-        if (userRepository.existsByEmailIgnoreCase(restaurantEmail)) {
-            return ResponseEntity.badRequest().body("Email already registered");
-        }
-
-        Restaurant restaurant = Restaurant.builder()
-                .name(name)
-                .address(address)
-                .phone(phone)
-                .build();
-
-        restaurant.setEmail(restaurantEmail);
-        restaurant.setPassword(passwordEncoder.encode(password));
-        restaurant.setRole(Role.RESTAURANT);
-
-        restaurant = restaurantRepository.save(restaurant);
-
-        return AuthService.createResponseWithAccessToken(restaurant);
+        return userService.registerRestaurant(registrationRequest);
     }
 
     public ResponseEntity<?> addMenu(String restaurantEmail, Menu menu) {
@@ -81,6 +59,8 @@ public class RestaurantService {
         restaurantRepository.save(restaurant);
 
         SuccessResponse response = new SuccessResponse("Menu added successfully");
+        eventLogService.saveEventLog(EventLog.Event.EDIT_MENU, restaurant.getId());
+
         return ResponseEntity.ok(menu);
     }
 
@@ -100,6 +80,7 @@ public class RestaurantService {
         menuService.editFood(foodId, food, menu);
 
         SuccessResponse message = new SuccessResponse("Food edited successfully");
+        eventLogService.saveEventLog(EventLog.Event.EDIT_MENU, restaurant.getId());
         return ResponseEntity.ok().body(message);
     }
 
@@ -147,8 +128,9 @@ public class RestaurantService {
 
         food.setMenu(restaurant.getMenu());
 
-        restaurantRepository.save(restaurant);
+        restaurant = restaurantRepository.save(restaurant);
         SuccessResponse message = new SuccessResponse("Food added successfully");
+        eventLogService.saveEventLog(EventLog.Event.EDIT_MENU, restaurant.getId());
         return ResponseEntity.ok().body(message);
     }
 

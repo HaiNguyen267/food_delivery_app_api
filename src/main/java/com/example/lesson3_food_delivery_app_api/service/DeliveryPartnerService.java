@@ -4,6 +4,7 @@ import com.example.lesson3_food_delivery_app_api.dto.request.DeliveryPartnerRegi
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.DeliveryPartner;
+import com.example.lesson3_food_delivery_app_api.entity.EventLog;
 import com.example.lesson3_food_delivery_app_api.entity.Order;
 import com.example.lesson3_food_delivery_app_api.entity.OrderStatus;
 import com.example.lesson3_food_delivery_app_api.exception.OrderDeliveringException;
@@ -23,10 +24,10 @@ import java.util.List;
 public class DeliveryPartnerService {
 
     private final DeliveryPartnerRepository deliveryPartnerRepository;
-
     private final OrderService orderService;
-
     private final UserService userService;
+    private final EventLogService eventLogService;
+
     public ResponseEntity<?> register(DeliveryPartnerRegistrationRequest deliveryPartnerRegistrationRequest) {
        return userService.registerDeliveryPartner(deliveryPartnerRegistrationRequest);
     }
@@ -54,8 +55,8 @@ public class DeliveryPartnerService {
         orderService.saveOrder(order);
 
         deliveryPartner.getDeliveringOrders().add(order);
-        deliveryPartnerRepository.save(deliveryPartner);
-
+        deliveryPartner = deliveryPartnerRepository.save(deliveryPartner);
+        eventLogService.saveEventLog(EventLog.Event.DELIVERY_ORDER, deliveryPartner.getId());
         return ResponseEntity.ok(new SuccessResponse("Order delivered successfully"));
     }
 
@@ -77,8 +78,9 @@ public class DeliveryPartnerService {
 
         deliveryPartner.getDeliveringOrders().remove(order);
         deliveryPartner.getDeliveredOrders().add(order);
-        deliveryPartnerRepository.save(deliveryPartner);
+        deliveryPartner = deliveryPartnerRepository.save(deliveryPartner);
 
+        eventLogService.saveEventLog(EventLog.Event.FINISH_DELIVERY, deliveryPartner.getId());
         return ResponseEntity.ok(new SuccessResponse("Order delivered successfully"));
     }
 

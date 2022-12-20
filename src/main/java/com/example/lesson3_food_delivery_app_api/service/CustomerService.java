@@ -32,6 +32,7 @@ public class CustomerService {
 
     private final FoodService foodService;
     private final RestaurantService restaurantService;
+    private final EventLogService eventLogService;
     private final OrderService orderService;
     private final UserService userService;
 
@@ -52,6 +53,7 @@ public class CustomerService {
         return restaurantService.getRestaurantMenu(restaurantId);
     }
 
+    @Transactional
     public ResponseEntity<?> commentFood(String userEmail, FoodCommentRequest foodCommentRequest) {
         Food food = foodService.getFoodById(foodCommentRequest.getFoodId());
 
@@ -70,7 +72,7 @@ public class CustomerService {
 
         food.getComments().add(comment);
         foodService.saveFood(food);
-
+        eventLogService.saveEventLog(EventLog.Event.COMMENT_FOOD, customer.getId());
         SuccessResponse response = new SuccessResponse("Commented successfully");
         return ResponseEntity.ok(response);
     }
@@ -81,6 +83,7 @@ public class CustomerService {
 
 
 
+    @Transactional
     public ResponseEntity<?> rateFood(String currentCustomerEmail, FoodRatingRequest foodRatingRequest) {
         Food food = foodService.getFoodById(foodRatingRequest.getFoodId());
 
@@ -102,7 +105,7 @@ public class CustomerService {
         food.getRatings().add(rating);
         foodService.saveFood(food);
 
-
+        eventLogService.saveEventLog(EventLog.Event.RATE_FOOD, customer.getId());
         SuccessResponse response = new SuccessResponse("Rated successfully");
         return ResponseEntity.ok(response);
     }
@@ -146,6 +149,7 @@ public class CustomerService {
                 .price(order.getPrice())
                 .build();
 
+        eventLogService.saveEventLog(EventLog.Event.ORDER_FOOD, customer.getId());
         return ResponseEntity.ok(orderFoodResponse);
     }
 

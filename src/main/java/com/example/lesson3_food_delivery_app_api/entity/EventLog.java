@@ -1,10 +1,8 @@
 package com.example.lesson3_food_delivery_app_api.entity;
 
 
-import lombok.AllArgsConstructor;
+import lombok.*;
 import lombok.Data;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -13,21 +11,29 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class EventLog {
 
     public static enum Event{
         REGISTER,
         LOGIN,
         LOGIN_FAILED,
+
         // restaurant
         EDIT_MENU,
 
         // customer
         ORDER_FOOD,
+        COMMENT_FOOD,
+        RATE_FOOD,
 
         // delivery partner
         DELIVERY_ORDER,
         FINISH_DELIVERY,
+
+        // admin
+        LOCK_USER,
+        UNLOCK_USER
 
     }
     @Id
@@ -39,6 +45,6 @@ public class EventLog {
 
     private LocalDateTime time;
 
-    @OneToOne
+    @ManyToOne
     private User user;
 }

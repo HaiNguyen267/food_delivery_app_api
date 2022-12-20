@@ -4,21 +4,18 @@ import com.example.lesson3_food_delivery_app_api.dto.ChangeAccessRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.AdminRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.CustomerRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.DeliveryPartnerRegistrationRequest;
+import com.example.lesson3_food_delivery_app_api.dto.request.RestaurantRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
-import com.example.lesson3_food_delivery_app_api.entity.Admin;
-import com.example.lesson3_food_delivery_app_api.entity.Customer;
-import com.example.lesson3_food_delivery_app_api.entity.DeliveryPartner;
-import com.example.lesson3_food_delivery_app_api.entity.User;
-import com.example.lesson3_food_delivery_app_api.repository.AdminRepository;
-import com.example.lesson3_food_delivery_app_api.repository.CustomerRepository;
-import com.example.lesson3_food_delivery_app_api.repository.DeliveryPartnerRepository;
-import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
+import com.example.lesson3_food_delivery_app_api.entity.*;
+import com.example.lesson3_food_delivery_app_api.repository.*;
 import com.example.lesson3_food_delivery_app_api.security.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 
 import static com.example.lesson3_food_delivery_app_api.dto.ChangeAccessRequest.*;
 
@@ -30,8 +27,12 @@ public class UserService {
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
     private final DeliveryPartnerRepository deliveryPartnerRepository;
+    private final RestaurantRepository restaurantRepository;
+    private final EventLogService eventLogService;
 
     private final PasswordEncoder passwordEncoder;
+
+    @Transactional
     public ResponseEntity<?> changeAccess(ChangeAccessRequest changeAccessRequest) {
         User user = getUserById(changeAccessRequest.getUserId());
         Operation operation = changeAccessRequest.getOperation();
@@ -47,23 +48,28 @@ public class UserService {
             return ResponseEntity.badRequest().body(response);
         }
 
+        EventLog.Event event = null;
         if (changeAccessRequest.getOperation() == Operation.LOCK) {
             boolean userIsAdmin = user.getRole().equals(Role.ADMIN);
             if (userIsAdmin) {
                 ErrorResponse response = new ErrorResponse("You can't lock admin");
                 return ResponseEntity.badRequest().body(response);
             }
-
+            event = EventLog.Event.LOCK_USER;
             user.setLocked(true);
         } else {
             user.setLocked(false);
+            event = EventLog.Event.UNLOCK_USER;
         }
 
-        userRepository.save(user);
+
+        user = userRepository.save(user);
+        eventLogService.saveEventLog(event, user.getId());
         SuccessResponse successResponse = new SuccessResponse(String.format("User %s %sed successfully", user.getEmail(), operation.name().toLowerCase()));
         return ResponseEntity.ok(successResponse);
     }
 
+    @Transactional
     public ResponseEntity<?> registerAdmin(AdminRegistrationRequest adminRegistrationRequest) {
         String email = adminRegistrationRequest.getEmail();
         String password = adminRegistrationRequest.getPassword();
@@ -79,6 +85,7 @@ public class UserService {
         admin.setRole(Role.ADMIN);
         admin = adminRepository.save(admin);
 
+        eventLogService.saveEventLog(EventLog.Event.REGISTER, admin.getId());
         return AuthService.createResponseWithAccessToken(admin);
 
     }
@@ -104,7 +111,7 @@ public class UserService {
         customer.setRole(Role.CUSTOMER);
 
         customer = customerRepository.save(customer);
-
+        eventLogService.saveEventLog(EventLog.Event.REGISTER, customer.getId());
         return AuthService.createResponseWithAccessToken(customer);
 
     }
@@ -127,14 +134,43 @@ public class UserService {
         deliveryPartner.setPassword(passwordEncoder.encode(password));
         deliveryPartner.setRole(Role.DELIVERY_PARTNER);
 
-        deliveryPartnerRepository.save(deliveryPartner);
+        deliveryPartner = deliveryPartnerRepository.save(deliveryPartner);
+        eventLogService.saveEventLog(EventLog.Event.REGISTER, deliveryPartner.getId());
         SuccessResponse response = new SuccessResponse("Delivery partner registered successfully");
         return ResponseEntity.ok(response);
     }
 
 
+    public ResponseEntity<?> registerRestaurant(RestaurantRegistrationRequest registrationRequest) {
+        String restaurantEmail = registrationRequest.getEmail();
+        String password = registrationRequest.getPassword();
+        String address = registrationRequest.getAddress();
+        String phone = registrationRequest.getPhone();
+        String name = registrationRequest.getName();
 
-    private User getUserById(long userId) {
+        if (userRepository.existsByEmailIgnoreCase(restaurantEmail)) {
+            return ResponseEntity.badRequest().body("Email already registered");
+        }
+
+        Restaurant restaurant = Restaurant.builder()
+                .name(name)
+                .address(address)
+                .phone(phone)
+                .build();
+
+        restaurant.setEmail(restaurantEmail);
+        restaurant.setPassword(passwordEncoder.encode(password));
+        restaurant.setRole(Role.RESTAURANT);
+
+        restaurant = restaurantRepository.save(restaurant);
+        eventLogService.saveEventLog(EventLog.Event.REGISTER, restaurant.getId());
+        return AuthService.createResponseWithAccessToken(restaurant);
+    }
+
+
+
+
+    public User getUserById(long userId) {
         // TODO: NOT FOUND EXCEPTION
         return userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -142,5 +178,16 @@ public class UserService {
 
     public boolean existsByEmail(String username) {
         return userRepository.existsByEmailIgnoreCase(username);
+    }
+
+    public boolean checkIfUserWasLocked(String email) {
+
+        User user = getUserByEmail(email);
+        return user.isLocked();
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

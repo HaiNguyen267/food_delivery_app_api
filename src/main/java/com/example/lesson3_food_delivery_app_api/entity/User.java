@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -36,4 +37,6 @@ public class User {
     private long accessFailedCount; // 0 - 5, lock user after 5 failed attempts
     private boolean isLocked;
 
+    @OneToMany(cascade =  {CascadeType.PERSIST, CascadeType.REMOVE}, mappedBy = "user")
+    private List<EventLog> eventLogs;
 }
