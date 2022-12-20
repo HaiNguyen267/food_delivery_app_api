@@ -30,39 +30,13 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    private final UserRepository userRepository;
-
-    private final PasswordEncoder passwordEncoder;
-
     private final FoodService foodService;
-
     private final RestaurantService restaurantService;
-
     private final OrderService orderService;
+    private final UserService userService;
 
     public ResponseEntity<?> register(CustomerRegistrationRequest customerRegistrationRequest) {
-        String name = customerRegistrationRequest.getName();
-        String email = customerRegistrationRequest.getEmail();
-        String password = customerRegistrationRequest.getPassword();
-        String address = customerRegistrationRequest.getAddress();
-
-        if (userRepository.existsByEmailIgnoreCase(email)) {
-            ErrorResponse response = new ErrorResponse("Email already registered");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        Customer customer = Customer.builder()
-                .name(name)
-                .address(address)
-                .build();
-
-        customer.setEmail(email);
-        customer.setPassword(passwordEncoder.encode(password));
-        customer.setRole(Role.CUSTOMER);
-
-        customer = customerRepository.save(customer);
-
-        return AuthService.createResponseWithAccessToken(customer);
+        return userService.registerCustomer(customerRegistrationRequest);
 
     }
 

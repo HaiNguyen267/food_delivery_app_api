@@ -32,7 +32,7 @@ public class AuthService {
 
 
         Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-
+        //TODO: handle locekd user case
         if (authentication.isAuthenticated()) {
             User user = userRepository.findByEmail(loginRequest.getUsername()).get();
 

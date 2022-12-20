@@ -33,4 +33,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     protected Role role;
 
+    private long accessFailedCount; // 0 - 5, lock user after 5 failed attempts
+    private boolean isLocked;
+
 }

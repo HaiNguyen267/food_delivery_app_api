@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.EnumSet;
 import java.util.List;
 
 @Service
@@ -23,31 +24,11 @@ public class DeliveryPartnerService {
 
     private final DeliveryPartnerRepository deliveryPartnerRepository;
 
-    private final PasswordEncoder passwordEncoder;
-
     private final OrderService orderService;
 
-    public ResponseEntity<?> register(DeliveryPartnerRegistrationRequest registrationRequest) {
-        String name = registrationRequest.getName();
-        String email = registrationRequest.getEmail();
-        String password = registrationRequest.getPassword();
-
-        if (deliveryPartnerRepository.existsByEmailIgnoreCase(email)) {
-            ErrorResponse response = new ErrorResponse("Email already registered");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        DeliveryPartner deliveryPartner = DeliveryPartner.builder()
-                .name(name)
-                .build();
-
-        deliveryPartner.setEmail(email);
-        deliveryPartner.setPassword(passwordEncoder.encode(password));
-        deliveryPartner.setRole(Role.DELIVERY_PARTNER);
-
-        deliveryPartnerRepository.save(deliveryPartner);
-        SuccessResponse response = new SuccessResponse("Delivery partner registered successfully");
-        return ResponseEntity.ok(response);
+    private final UserService userService;
+    public ResponseEntity<?> register(DeliveryPartnerRegistrationRequest deliveryPartnerRegistrationRequest) {
+       return userService.registerDeliveryPartner(deliveryPartnerRegistrationRequest);
     }
 
     public List<Order> viewReadyOrders() {
@@ -104,5 +85,13 @@ public class DeliveryPartnerService {
     private DeliveryPartner getDeliveryPartnerByEmail(String currentDeliveryPartnerEmail) {
         return deliveryPartnerRepository.findByEmailIgnoreCase(currentDeliveryPartnerEmail)
                 .orElseThrow(() -> new RuntimeException("Delivery partner not found"));
+    }
+
+    public List<?> getAllDeliveryPartners() {
+        return deliveryPartnerRepository.findAll();
+    }
+
+    public List<?> getAllDeliveryOrder(long deliveryPartnerId) {
+        return deliveryPartnerRepository.findAllOrdersByStatus(deliveryPartnerId, EnumSet.of(OrderStatus.READY, OrderStatus.DELIVERING));
     }
 }
