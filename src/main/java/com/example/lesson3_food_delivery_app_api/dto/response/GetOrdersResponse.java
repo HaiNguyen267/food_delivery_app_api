@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetOrdersResponse {
+    //TODO: delete this class
 
     @Data
     public static class OrderDTO {
@@ -24,7 +25,10 @@ public class GetOrdersResponse {
             this.id = order.getId();
             this.price = order.getPrice();
             this.foodId = order.getFood().getId();
-            this.deliveryPartnerId = order.getDeliveryPartner().getId();
+            // if the order is being delivering by a delivery partner, then we return the delivery partner id
+            if (order.getDeliveryPartner() != null) {
+                this.deliveryPartnerId = order.getDeliveryPartner().getId();
+            }
             this.status = order.getStatus().name();
         }
     }

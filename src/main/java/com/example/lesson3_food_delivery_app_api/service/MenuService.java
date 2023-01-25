@@ -26,18 +26,29 @@ public class MenuService {
         return menuRepository.save(menu);
     }
 
-    public void editFood(Long foodId, Food newFood, Menu menu) {
+    public Food editFood(Long foodId, Food newFood, Menu menu) {
 
         for (Food food : menu.getFoods()) {
-            //TODO:  check if new fields are not null
+            //check if new fields are not null
             if (food.getId() == foodId) {
-                food.setName(newFood.getName());
-                food.setPrice(newFood.getPrice());
-                food.setDescription(newFood.getDescription());
-                food.setImageUrl(newFood.getImageUrl());
-                foodService.saveFood(food);
+                if (newFood.getName() != null) {
+                    food.setName(newFood.getName());
+                }
+
+                if (newFood.getPrice() > 0) {
+                    food.setPrice(newFood.getPrice());
+                }
+
+                if (newFood.getDescription() != null) {
+                    food.setDescription(newFood.getDescription());
+                }
+
+                if (newFood.getImageUrl() != null) {
+                    food.setImageUrl(newFood.getImageUrl());
+                }
+                return foodService.saveFood(food);
             }
         }
-
+        return null;
     }
 }

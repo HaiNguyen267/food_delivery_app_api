@@ -11,5 +11,5 @@ import java.util.List;
 public interface EventLogRepository extends JpaRepository<EventLog, Long> {
 
     @Query("SELECT e FROM EventLog e WHERE e.user.id = :userId")
-    List<?> findEventLogsByUserId(Long userId);
+    List<EventLog> findEventLogsByUserId(Long userId);
 }

@@ -2,6 +2,7 @@ package com.example.lesson3_food_delivery_app_api.service;
 
 import com.example.lesson3_food_delivery_app_api.entity.EventLog;
 import com.example.lesson3_food_delivery_app_api.entity.User;
+import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
 import com.example.lesson3_food_delivery_app_api.repository.EventLogRepository;
 import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -16,8 +17,9 @@ public class EventLogService {
 
     private final EventLogRepository eventLogRepository;
     private final UserRepository userRepository;
-    public List<?> getEventLogs(Long userId) {
-        return eventLogRepository.findEventLogsByUserId(userId);
+    public List<EventLog> getEventLogs(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        return user.getEventLogs();
     }
 
     public void saveEventLog(EventLog.Event event, Long userId) {

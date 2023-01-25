@@ -1,8 +1,8 @@
 package com.example.lesson3_food_delivery_app_api.service;
 
 import com.example.lesson3_food_delivery_app_api.dto.request.LoginRequest;
-import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
-import com.example.lesson3_food_delivery_app_api.dto.response.LoginResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.AccessToken;
+import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.EventLog;
 import com.example.lesson3_food_delivery_app_api.entity.User;
 import com.example.lesson3_food_delivery_app_api.exception.UserLockedException;
@@ -10,7 +10,6 @@ import com.example.lesson3_food_delivery_app_api.exception.WrongUsernamePassword
 import com.example.lesson3_food_delivery_app_api.jwt.JwtProvider;
 import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,16 +39,17 @@ public class AuthService {
             if (user.isLocked()) throw new UserLockedException("Account is locked");
 
             eventLogService.saveEventLog(EventLog.Event.LOGIN, user.getId());
-            return createResponseWithAccessToken(user);
+            AccessToken accessToken = generateAccessToken(user);
+            SuccessResponse response = new SuccessResponse(200, "Login successful", accessToken);
+            return ResponseEntity.ok(response);
         } else {
             System.out.println("wrong username and password message");
             throw new WrongUsernamePasswordException("Wrong username or password");
         }
     }
 
-    public static ResponseEntity<LoginResponse> createResponseWithAccessToken(User user) {
-        String accessToken = JwtProvider.generateToken(user);
-        LoginResponse loginResponse = new LoginResponse(accessToken);
-        return ResponseEntity.ok(loginResponse);
+    public static AccessToken generateAccessToken(User user) {
+        String token = JwtProvider.generateToken(user);
+        return new AccessToken(token);
     }
 }

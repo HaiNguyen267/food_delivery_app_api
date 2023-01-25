@@ -15,9 +15,8 @@ public class FoodService {
 
     private final FoodRepository foodRepository;
 
-    public void saveFood(Food food) {
-        foodRepository.save(food);
-
+    public Food saveFood(Food food) {
+        return foodRepository.save(food);
     }
 
     public void deleteFoodById(long foodId) {

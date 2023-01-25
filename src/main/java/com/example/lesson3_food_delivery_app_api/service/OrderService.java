@@ -28,7 +28,7 @@ public class OrderService {
         return readyOrders;
     }
 
-    public List<?> findUnDeliveredOrdersOfCustomer(String currentCustomerEmail) {
+    public List<Order> findUnDeliveredOrdersOfCustomer(String currentCustomerEmail) {
         return orderRepository.findUnDeliveredOrdersOfCustomer(currentCustomerEmail);
     }
 }

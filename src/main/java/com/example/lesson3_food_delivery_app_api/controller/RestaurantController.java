@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 
 @RestController
@@ -38,7 +37,16 @@ public class RestaurantController {
                     description = "Restaurant registered successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = RegisterResponse.class))
+                            schema = @Schema(implementation = SuccessResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                        "status": 200,
+                                        "message": "Register successfully",
+                                        "data": {
+                                            "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUkVTVEFVUkFOVCIsImVtYWlsIjoicmVzNEByLmNvbSIsImlhdCI6MTY3NDU1NzQ3NiwiZXhwIjoxNjc1MTYyMjc2fQ.kYpb3mb74okBViIa_nN0O5tdtMPGzx8otdmfIzo1hmA"
+                                        }
+                                    }
+                                    """))
                     }
             ),
             @ApiResponse(
@@ -46,7 +54,13 @@ public class RestaurantController {
                     description = "Email was already registered",
                     content = {
                             @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseStatusException.class))
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                        "status": 400,
+                                        "message": "Email already registered"
+                                    }
+                                    """))
                     }
             )
     })
@@ -61,8 +75,15 @@ public class RestaurantController {
                     description = "Menu added successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = SuccessResponse.class)
-                            ),
+                                    schema = @Schema(implementation = SuccessResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 200,
+                                                "message": "Menu added successfully",
+                                                "data": null
+                                            }
+                                            """)
+                            )
 
                     }
             )
@@ -71,7 +92,6 @@ public class RestaurantController {
     public ResponseEntity<?> addMenu(@RequestBody Menu menu) {
         // get email of current logged in restaurant email
         String email = getCurrentRestaurant().getUsername();
-        System.out.println("email: " + email);
         return restaurantService.addMenu(email, menu);
     }
 
@@ -88,15 +108,22 @@ public class RestaurantController {
                     description = "Menu edited successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = SuccessResponse.class))
-                    }
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Food not in menu",
-                    content = {
-                            @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class))
+                                    schema = @Schema(implementation = SuccessResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 200,
+                                                "message": "Food edited successfully",
+                                                "data": {
+                                                    "id": 18,
+                                                    "name": "Pho",
+                                                    "price": 15.0,
+                                                    "description": "Vietnamese famous food",
+                                                    "imageUrl": null,
+                                                    "rating": null
+                                                }
+                                            }
+                                            """)
+                            )
                     }
             ),
             @ApiResponse(
@@ -104,7 +131,14 @@ public class RestaurantController {
                     description = "Food not found",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class))
+                                    schema = @Schema(implementation = ErrorResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 404,
+                                                "message": "Food id does not exist in menu"
+                                            }
+                                            """)
+                            )
                     }
             )
     })
@@ -122,7 +156,15 @@ public class RestaurantController {
                     description = "Delete food successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = SuccessResponse.class))
+                                    schema = @Schema(implementation = SuccessResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 200,
+                                                "message": "Delete food successfully",
+                                                "data": null
+                                            }
+                                            """)
+                            )
                     }
             ),
             @ApiResponse(
@@ -130,14 +172,20 @@ public class RestaurantController {
                     description = "Food not found",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class))
+                                    schema = @Schema(implementation = ErrorResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 404,
+                                                "message": "Food id does not exist in menu"
+                                            }
+                                            """)
+                            )
                     }
             )
     })
     @DeleteMapping("/deleteFood/{foodId}")
     public ResponseEntity<?> deleteFood(@PathVariable Long foodId) {
         String email = getCurrentRestaurant().getUsername();
-        System.out.println("foodId = " + foodId);;
         return restaurantService.deleteFood(email,foodId);
     }
 
@@ -164,10 +212,23 @@ public class RestaurantController {
                     description = "Get orders successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    examples = @ExampleObject(
-                                            name = "SuccessResponse",
-                                            value = "Get orders successfully"),
-                                    schema = @Schema(implementation = GetOrdersResponse.class))
+                                    schema = @Schema(implementation = GetOrdersResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 200,
+                                                "message": "Orders retrieved successfully",
+                                                "data": [
+                                                    {
+                                                        "id": 1,
+                                                        "price": 75.0,
+                                                        "foodId": 1,
+                                                        "deliveryPartnerId": 3,
+                                                        "status": "DELIVERED"
+                                                    }
+                                                ]
+                                            }
+                                            """)
+                            )
                     }
             )
     })
@@ -184,10 +245,41 @@ public class RestaurantController {
                     description = "Get menu successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    examples = @ExampleObject(
-                                            name = "SuccessResponse",
-                                            value = "Get order successfully"),
-                                    schema = @Schema(implementation = Menu.class))
+                                    schema = @Schema(implementation = SuccessResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 200,
+                                                "message": "Menu retrieved successfully",
+                                                "data": [
+                                                    {
+                                                        "id": 13,
+                                                        "name": "Band mi",
+                                                        "price": 2.0,
+                                                        "description": "A kind of sandwich",
+                                                        "imageUrl": null,
+                                                        "rating": null
+                                                    },
+                                                    {
+                                                        "id": 14,
+                                                        "name": "Pho",
+                                                        "price": 15.0,
+                                                        "description": "Vietnamese famous food",
+                                                        "imageUrl": null,
+                                                        "rating": null
+                                                    },
+                                                    {
+                                                        "id": 15,
+                                                        "name": "Salad",
+                                                        "price": 5.0,
+                                                        "description": "made from fresh vegetables",
+                                                        "imageUrl": null,
+                                                        "rating": null
+                                                    }
+                                                ]           
+                                            }
+                                            """
+                                    )
+                            )
                     }
             )
     })
@@ -203,7 +295,26 @@ public class RestaurantController {
                     description = "Track order successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = Order.class))
+                                    schema = @Schema(implementation = SuccessResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                  "status": 200,
+                                                  "message": "Order retrieved successfully",
+                                                  "data": {
+                                                      "id": 1,
+                                                      "quantity": 5,
+                                                      "price": 75.0,
+                                                      "orderTime": "2023-01-24 12:28",
+                                                      "deliveryTime": "2023-01-24 12:32",
+                                                      "status": "DELIVERED",
+                                                      "restaurantName": "Two Bears Restaurant",
+                                                      "foodName": "Pho",
+                                                      "deliveryPartnerName": "Express Company"
+                                                  }
+                                            }
+                                            """)
+
+                            )
                     }
             ),
             @ApiResponse(
@@ -211,7 +322,14 @@ public class RestaurantController {
                     description = "Order not found",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class))
+                                    schema = @Schema(implementation = ErrorResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 404,
+                                                "message": "Order not found in order list"
+                                            }
+                                            """)
+                            )
                     }
             )
     })

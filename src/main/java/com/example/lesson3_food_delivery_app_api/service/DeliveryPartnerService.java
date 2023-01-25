@@ -7,6 +7,7 @@ import com.example.lesson3_food_delivery_app_api.entity.DeliveryPartner;
 import com.example.lesson3_food_delivery_app_api.entity.EventLog;
 import com.example.lesson3_food_delivery_app_api.entity.Order;
 import com.example.lesson3_food_delivery_app_api.entity.OrderStatus;
+import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
 import com.example.lesson3_food_delivery_app_api.exception.OrderDeliveringException;
 import com.example.lesson3_food_delivery_app_api.repository.DeliveryPartnerRepository;
 import com.example.lesson3_food_delivery_app_api.security.Role;
@@ -33,10 +34,11 @@ public class DeliveryPartnerService {
        return userService.registerDeliveryPartner(deliveryPartnerRegistrationRequest);
     }
 
-    public List<Order> viewReadyOrders() {
+    public ResponseEntity<?> viewReadyOrders() {
         // return orders which are ready to be delivered
         List<Order> readyOrders = orderService.getReadyOrders();
-        return readyOrders;
+        SuccessResponse successResponse = new SuccessResponse(200, "Ready orders retrieved successfully", readyOrders);
+        return ResponseEntity.ok(successResponse);
     }
 
     @Transactional
@@ -59,7 +61,7 @@ public class DeliveryPartnerService {
         deliveryPartner.getDeliveringOrders().add(order);
         deliveryPartner = deliveryPartnerRepository.save(deliveryPartner);
         eventLogService.saveEventLog(EventLog.Event.DELIVERY_ORDER, deliveryPartner.getId());
-        return ResponseEntity.ok(new SuccessResponse("Order is being delivered"));
+        return ResponseEntity.ok(new SuccessResponse(200, "Order delivery started successfully"));
     }
 
     @Transactional
@@ -68,11 +70,11 @@ public class DeliveryPartnerService {
         Order order = orderService.getOrderById(orderId);
 
         if (order.getStatus() == OrderStatus.DELIVERED) {
-            throw new OrderDeliveringException("Order is already delivered");
+            throw new OrderDeliveringException("Order delivery is already finished");
         }
 
         if (order.getStatus() == OrderStatus.READY) {
-            throw new OrderDeliveringException("Order is not being delivered");
+            throw new OrderDeliveringException("Order delivery is not started yet");
         }
 
         order.setStatus(OrderStatus.DELIVERED);
@@ -84,7 +86,7 @@ public class DeliveryPartnerService {
         deliveryPartner = deliveryPartnerRepository.save(deliveryPartner);
 
         eventLogService.saveEventLog(EventLog.Event.FINISH_DELIVERY, deliveryPartner.getId());
-        return ResponseEntity.ok(new SuccessResponse("Order is delivered successfully"));
+        return ResponseEntity.ok(new SuccessResponse(200,"Order is delivered successfully"));
     }
 
     private DeliveryPartner getDeliveryPartnerByEmail(String currentDeliveryPartnerEmail) {
@@ -92,16 +94,25 @@ public class DeliveryPartnerService {
                 .orElseThrow(() -> new RuntimeException("Delivery partner not found"));
     }
 
-    public List<?> getAllDeliveryPartners() {
+    public List<DeliveryPartner> getAllDeliveryPartners() {
         return deliveryPartnerRepository.findAll();
     }
 
-    public List<?> getAllDeliveryOrder(long deliveryPartnerId) {
-        return deliveryPartnerRepository.findAllOrdersByStatus(deliveryPartnerId, EnumSet.of(OrderStatus.DELIVERING, OrderStatus.DELIVERED));
+    public List<Order> getAllDeliveryOrder(long deliveryPartnerId) {
+         DeliveryPartner deliveryPartner = deliveryPartnerRepository.findById(deliveryPartnerId)
+                 .orElseThrow(() -> new NotFoundException("Delivery partner not found"));
+
+         // get order deliveries of the delivery partner, both delivered and delivering
+         List<Order> allOrderDeliveries = deliveryPartner.getDeliveringOrders();
+         allOrderDeliveries.addAll(deliveryPartner.getDeliveredOrders());
+
+         return allOrderDeliveries;
     }
 
     public ResponseEntity<?> getDeliveringOrders(String currentDeliveryPartnerEmail) {
         DeliveryPartner deliveryPartner = getDeliveryPartnerByEmail(currentDeliveryPartnerEmail);
-        return ResponseEntity.ok(deliveryPartner.getDeliveringOrders());
+        SuccessResponse response = new SuccessResponse(200, "Delivering orders retrieved successfully", deliveryPartner.getDeliveringOrders());
+        return ResponseEntity.ok(response);
     }
+
 }

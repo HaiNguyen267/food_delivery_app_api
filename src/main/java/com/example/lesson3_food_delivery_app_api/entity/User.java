@@ -17,8 +17,6 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class User {
-    //TODO: log events
-    //TODO: brute force protection
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +34,7 @@ public class User {
 
     @JsonIgnore
     private long accessFailedCount; // 0 - 5, lock user after 5 failed attempts
+
     @JsonIgnore
     private boolean isLocked;
 

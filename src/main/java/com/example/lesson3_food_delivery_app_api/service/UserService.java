@@ -5,10 +5,12 @@ import com.example.lesson3_food_delivery_app_api.dto.request.AdminRegistrationRe
 import com.example.lesson3_food_delivery_app_api.dto.request.CustomerRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.DeliveryPartnerRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.RestaurantRegistrationRequest;
+import com.example.lesson3_food_delivery_app_api.dto.response.AccessToken;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
-import com.example.lesson3_food_delivery_app_api.dto.response.LoginResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.*;
+import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
+import com.example.lesson3_food_delivery_app_api.exception.RegistrationException;
 import com.example.lesson3_food_delivery_app_api.exception.WrongUsernamePasswordException;
 import com.example.lesson3_food_delivery_app_api.repository.*;
 import com.example.lesson3_food_delivery_app_api.security.Role;
@@ -42,11 +44,11 @@ public class UserService {
 
         if (operation == Operation.LOCK && user.isLocked()) {
             // if admin try to lock user which is already locked
-            ErrorResponse response = new ErrorResponse("User is already locked");
+            ErrorResponse response = new ErrorResponse(400, "User is already locked");
             return ResponseEntity.badRequest().body(response);
         } else if (operation == Operation.UNLOCK && !user.isLocked()) {
             // if admin try unlock user who is not locked
-            ErrorResponse response = new ErrorResponse("User is not locked");
+            ErrorResponse response = new ErrorResponse(400, "User is not locked");
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -54,7 +56,7 @@ public class UserService {
         if (changeAccessRequest.getOperation() == Operation.LOCK) {
             boolean userIsAdmin = user.getRole().equals(Role.ADMIN);
             if (userIsAdmin) {
-                ErrorResponse response = new ErrorResponse("You can't lock admin");
+                ErrorResponse response = new ErrorResponse(400, "You can't lock admin");
                 return ResponseEntity.badRequest().body(response);
             }
             event = EventLog.Event.LOCK_USER;
@@ -67,7 +69,7 @@ public class UserService {
 
         user = userRepository.save(user);
         eventLogService.saveEventLog(event, user.getId());
-        SuccessResponse successResponse = new SuccessResponse(String.format("User %s %sed successfully", user.getEmail(), operation.name().toLowerCase()));
+        SuccessResponse successResponse = new SuccessResponse(200, String.format("User %s %sed successfully", user.getEmail(), operation.name().toLowerCase()));
         return ResponseEntity.ok(successResponse);
     }
 
@@ -76,10 +78,7 @@ public class UserService {
         String email = adminRegistrationRequest.getEmail();
         String password = adminRegistrationRequest.getPassword();
 
-        if (existsByEmail(email)) {
-            ErrorResponse errorResponse = new ErrorResponse("Email already registered");
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
+        checkAndThrowExceptionIfEmailWasAlreadyTaken(email);
 
         Admin admin = new Admin();
         admin.setEmail(email);
@@ -88,8 +87,9 @@ public class UserService {
         admin = adminRepository.save(admin);
 
         eventLogService.saveEventLog(EventLog.Event.REGISTER, admin.getId());
-        return AuthService.createResponseWithAccessToken(admin);
-
+        AccessToken accessToken = AuthService.generateAccessToken(admin);
+        SuccessResponse successResponse = new SuccessResponse(200, "Admin registered successfully", accessToken);
+        return ResponseEntity.ok(successResponse);
     }
 
     public ResponseEntity<?> registerCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
@@ -98,10 +98,7 @@ public class UserService {
         String password = customerRegistrationRequest.getPassword();
         String address = customerRegistrationRequest.getAddress();
 
-        if (userRepository.existsByEmailIgnoreCase(email)) {
-            ErrorResponse response = new ErrorResponse("Email already registered");
-            return ResponseEntity.badRequest().body(response);
-        }
+        checkAndThrowExceptionIfEmailWasAlreadyTaken(email);
 
         Customer customer = Customer.builder()
                 .name(name)
@@ -114,8 +111,16 @@ public class UserService {
 
         customer = customerRepository.save(customer);
         eventLogService.saveEventLog(EventLog.Event.REGISTER, customer.getId());
-        return AuthService.createResponseWithAccessToken(customer);
+        AccessToken accessToken = AuthService.generateAccessToken(customer);
+        SuccessResponse response = new SuccessResponse(200, "Customer registered successfully", accessToken);
+        return ResponseEntity.ok(response);
 
+    }
+
+    private void checkAndThrowExceptionIfEmailWasAlreadyTaken(String email) {
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+           throw new RegistrationException("Email was already taken");
+        }
     }
 
     public ResponseEntity<?> registerDeliveryPartner(DeliveryPartnerRegistrationRequest registrationRequest) {
@@ -123,10 +128,7 @@ public class UserService {
         String email = registrationRequest.getEmail();
         String password = registrationRequest.getPassword();
 
-        if (existsByEmail(email)) {
-            ErrorResponse response = new ErrorResponse("Email already registered");
-            return ResponseEntity.badRequest().body(response);
-        }
+        checkAndThrowExceptionIfEmailWasAlreadyTaken(email);
 
         DeliveryPartner deliveryPartner = DeliveryPartner.builder()
                 .name(name)
@@ -138,8 +140,10 @@ public class UserService {
 
         deliveryPartner = deliveryPartnerRepository.save(deliveryPartner);
         eventLogService.saveEventLog(EventLog.Event.REGISTER, deliveryPartner.getId());
-        SuccessResponse response = new SuccessResponse("Delivery partner registered successfully");
-        return AuthService.createResponseWithAccessToken(deliveryPartner);
+
+        AccessToken accessToken = AuthService.generateAccessToken(deliveryPartner);
+        SuccessResponse response = new SuccessResponse(200, "Delivery partner registered successfully", accessToken);
+        return ResponseEntity.ok(response);
     }
 
 
@@ -150,9 +154,7 @@ public class UserService {
         String phone = registrationRequest.getPhone();
         String name = registrationRequest.getName();
 
-        if (userRepository.existsByEmailIgnoreCase(restaurantEmail)) {
-            return ResponseEntity.badRequest().body("Email already registered");
-        }
+        checkAndThrowExceptionIfEmailWasAlreadyTaken(restaurantEmail);
 
         Restaurant restaurant = Restaurant.builder()
                 .name(name)
@@ -166,16 +168,18 @@ public class UserService {
 
         restaurant = restaurantRepository.save(restaurant);
         eventLogService.saveEventLog(EventLog.Event.REGISTER, restaurant.getId());
-        return AuthService.createResponseWithAccessToken(restaurant);
+
+        AccessToken accessToken = AuthService.generateAccessToken(restaurant);
+        SuccessResponse response = new SuccessResponse(200, "Register successfully", accessToken);
+
+        return ResponseEntity.ok(response);
     }
-
-
 
 
     public User getUserById(long userId) {
         // TODO: NOT FOUND EXCEPTION
         return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     public boolean existsByEmail(String username) {

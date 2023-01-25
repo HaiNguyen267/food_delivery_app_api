@@ -4,19 +4,15 @@ import com.example.lesson3_food_delivery_app_api.dto.request.CustomerRegistratio
 import com.example.lesson3_food_delivery_app_api.dto.request.FoodCommentRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.FoodRatingRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.OrderFoodRequest;
-import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
-import com.example.lesson3_food_delivery_app_api.dto.response.OrderFoodResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.OrderFoodResponseDTO;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.*;
 import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
 import com.example.lesson3_food_delivery_app_api.exception.RatingInvalidException;
 import com.example.lesson3_food_delivery_app_api.exception.UserHasNotOrderedFoodException;
 import com.example.lesson3_food_delivery_app_api.repository.CustomerRepository;
-import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
-import com.example.lesson3_food_delivery_app_api.security.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -42,16 +38,22 @@ public class CustomerService {
 
     }
 
-    public List<Food> viewAllFoods() {
-        return foodService.getAllFoods();
+    public ResponseEntity<?> viewAllFoods() {
+        List<Food> allFoods = foodService.getAllFoods();
+        SuccessResponse response = new SuccessResponse(200, "All foods retrieved successfully", allFoods);
+        return ResponseEntity.ok(response);
     }
 
-    public List<Restaurant> viewAllRestaurants() {
-        return restaurantService.getAllRestaurants();
+    public ResponseEntity<?>  viewAllRestaurants() {
+        List<Restaurant> allRestaurants = restaurantService.getAllRestaurants();
+        SuccessResponse response = new SuccessResponse(200, "All restaurants retrieved successfully", allRestaurants);
+        return ResponseEntity.ok(response);
     }
 
     public ResponseEntity<?> getRestaurantMenu(long restaurantId) {
-        return restaurantService.getRestaurantMenu(restaurantId);
+        Menu restaurantMenu = restaurantService.getRestaurantMenu(restaurantId);
+        SuccessResponse response = new SuccessResponse(200, "Restaurant menu retrieved successfully", restaurantMenu.getFoods());
+        return ResponseEntity.ok(response);
     }
 
     @Transactional
@@ -70,11 +72,11 @@ public class CustomerService {
                 .food(food)
                 .build();
 
-
         food.getComments().add(comment);
+
         foodService.saveFood(food);
         eventLogService.saveEventLog(EventLog.Event.COMMENT_FOOD, customer.getId());
-        SuccessResponse response = new SuccessResponse("Commented successfully");
+        SuccessResponse response = new SuccessResponse(200,"Commented successfully");
         return ResponseEntity.ok(response);
     }
 
@@ -107,7 +109,7 @@ public class CustomerService {
         foodService.saveFood(food);
 
         eventLogService.saveEventLog(EventLog.Event.RATE_FOOD, customer.getId());
-        SuccessResponse response = new SuccessResponse("Rated successfully");
+        SuccessResponse response = new SuccessResponse(200, "Rated successfully");
         return ResponseEntity.ok(response);
     }
 
@@ -139,8 +141,9 @@ public class CustomerService {
 
         restaurant.getOrders().add(order);
         orderService.saveOrder(order);
+        eventLogService.saveEventLog(EventLog.Event.ORDER_FOOD, customer.getId());
 
-        OrderFoodResponse orderFoodResponse = OrderFoodResponse.builder()
+        OrderFoodResponseDTO orderFoodResponse = OrderFoodResponseDTO.builder()
                 .foodName(food.getName())
                 .orderId(order.getId())
                 .foodId(order.getFood().getId())
@@ -149,20 +152,23 @@ public class CustomerService {
                 .price(order.getPrice())
                 .build();
 
-        eventLogService.saveEventLog(EventLog.Event.ORDER_FOOD, customer.getId());
-        return ResponseEntity.ok(orderFoodResponse);
+        SuccessResponse response = new SuccessResponse(200, "Food ordered successfully", orderFoodResponse);
+
+        return ResponseEntity.ok(response);
     }
 
-    public List<?> getFoodComments(Long foodId) {
+    public ResponseEntity<?> getFoodComments(Long foodId) {
         Food food = foodService.getFoodById(foodId);
-        return food.getComments();
+        List<Comment> comments = food.getComments();
+        SuccessResponse successResponse = new SuccessResponse(200, "View food comments successfully", comments);
+        return ResponseEntity.ok(successResponse);
     }
 
-    public List<?> getAllCustomers() {
+    public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
     }
 
-    public List<?> findAllUnDeliveredOrders(long customerId) {
+    public List<Order> findAllUnDeliveredOrders(long customerId) {
         // check if customer exists
         Customer customer = getCustomerById(customerId);
 
@@ -174,7 +180,9 @@ public class CustomerService {
     }
 
 
-    public List<?> getOrders(String currentCustomerEmail) {
-        return orderService.findUnDeliveredOrdersOfCustomer(currentCustomerEmail);
+    public ResponseEntity<?> getOrders(String currentCustomerEmail) {
+        List<Order> unDeliveredOrdersOfCustomer = orderService.findUnDeliveredOrdersOfCustomer(currentCustomerEmail);
+        SuccessResponse response = new SuccessResponse(200, "Orders retrieved successfully", unDeliveredOrdersOfCustomer);
+        return ResponseEntity.ok(response);
     }
 }

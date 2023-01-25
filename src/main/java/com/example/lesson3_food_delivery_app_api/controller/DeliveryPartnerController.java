@@ -11,6 +11,7 @@ import com.example.lesson3_food_delivery_app_api.service.DeliveryPartnerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -39,15 +40,33 @@ public class DeliveryPartnerController {
                     description = "Restaurant registered successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = RegisterResponse.class))
+                                    schema = @Schema(implementation = SuccessResponse.class),
+                                    examples = @ExampleObject(value = """
+                                                    {
+                                                        "status": 200,
+                                                        "message": "Delivery partner registered successfully",
+                                                        "data": {
+                                                            "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImRlbDNAZC5jb20iLCJyb2xlIjoiREVMSVZFUllfUEFSVE5FUiIsImlhdCI6MTY3NDU2NzI5MSwiZXhwIjoxNjc1MTcyMDkxfQ.ZckzvLUpDrs5KzG81P1RX53ou3HYzDTAOido2lR43CY"
+                                                        }
+                                                    }
+                                            """)
+
+                            )
                     }
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Email was already registered",
+                    description = "Email was already taken",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class))
+                                    schema = @Schema(implementation = ErrorResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 400,
+                                                "message": "Email was already taken"
+                                            }
+                                            """)
+                            )
                     }
             )
     })
@@ -62,12 +81,33 @@ public class DeliveryPartnerController {
                     description = "View all ready orders  successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = List.class))
+                                    schema = @Schema(implementation = SuccessResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 200,
+                                                "message": "Ready orders retrieved successfully",
+                                                "data": [
+                                                    {
+                                                        "id": 3,
+                                                        "quantity": 5,
+                                                        "price": 25.0,
+                                                        "orderTime": "2023-01-24 20:20",
+                                                        "deliveryTime": null,
+                                                        "status": "READY",
+                                                        "restaurantName": "Two Bears Restaurant",
+                                                        "foodName": "Egg fried rice",
+                                                        "deliveryPartnerName": null
+                                                    }
+                                                ]
+                                            }
+                                            """
+                                    )
+                            )
                     }
             )
     })
     @GetMapping("/viewReadyOrders")
-    public List<Order> viewReadyOrders() {
+    public ResponseEntity<?> viewReadyOrders() {
         return deliveryPartnerService.viewReadyOrders();
     }
 
@@ -76,18 +116,35 @@ public class DeliveryPartnerController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Create an order delivery successfully",
+                    description = "Order delivery started successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = SuccessResponse.class))
+                                    schema = @Schema(implementation = SuccessResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                  "status": 200,
+                                                  "message": "Order delivery started successfully",
+                                                  "data": null
+                                              }
+                                            """
+                                    )
+                            )
                     }
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Order is being delivered",
+                    description = "Order is already being delivering",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class))
+                                    schema = @Schema(implementation = ErrorResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 400,
+                                                "message": "Order is already being delivering"
+                                            }
+                                            """
+                                    )
+                            )
                     }
             ),
             @ApiResponse(
@@ -95,7 +152,15 @@ public class DeliveryPartnerController {
                     description = "Order not found",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class))
+                                    schema = @Schema(implementation = ErrorResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 404,
+                                                "message": "Order not found"
+                                            }
+                                            """
+                                    )
+                            )
                     }
             )
     })
@@ -112,7 +177,26 @@ public class DeliveryPartnerController {
                     description = "Get delivering orders successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = Order.class))
+                                    schema = @Schema(implementation = SuccessResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 200,
+                                                "message": "Delivering orders retrieved successfully",
+                                                "data": [
+                                                    {
+                                                        "id": 4,
+                                                        "quantity": 5,
+                                                        "price": 25.0,
+                                                        "orderTime": "2023-01-24 20:50",
+                                                        "deliveryTime": null,
+                                                        "status": "DELIVERING",
+                                                        "foodName": "Egg fried rice",
+                                                        "restaurantName": "Two Bears Restaurant",
+                                                        "deliveryPartnerName": "Quick Move Company"
+                                                    }
+                                                ]
+                                            }
+                                            """)
 
                             )
                     }
@@ -128,18 +212,51 @@ public class DeliveryPartnerController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Delivered order successfully",
+                    description = "Order delivery is successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = List.class))
+                                    schema = @Schema(implementation = SuccessResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 200,
+                                                "message": "Order is delivered successfully",
+                                                "data": null
+                                            }
+                                            """
+                                    )
+                            )
                     }
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Order is already delivered",
+                    description = "Order delivery is already finished",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class))
+                                    schema = @Schema(implementation = ErrorResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 400,
+                                                "message": "Order delivery is already finished"
+                                            }
+                                            """
+                                )
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Order delivery is not started yet",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 400,
+                                                "message": "Order delivery is not started yet"
+                                            }
+                                            """
+                                    )
+                            )
                     }
             ),
             @ApiResponse(
@@ -147,9 +264,18 @@ public class DeliveryPartnerController {
                     description = "Order not found",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class))
+                                    schema = @Schema(implementation = ErrorResponse.class),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                                "status": 404,
+                                                "message": "Order not found"
+                                            }
+                                            """
+                                    )
+                            )
                     }
             )
+
     })
     @PostMapping("/finishDelivery/{orderId}")
     public ResponseEntity<?> finishDelivery(@PathVariable Long orderId) {

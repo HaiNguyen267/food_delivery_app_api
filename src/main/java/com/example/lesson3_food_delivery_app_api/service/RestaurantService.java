@@ -40,19 +40,24 @@ public class RestaurantService {
     }
 
     public ResponseEntity<?> addMenu(String restaurantEmail, Menu menu) {
-//        System.out.println("jihi");
 
         Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
 
         menu.getFoods().forEach(food -> food.setMenu(menu)); // food is the owning side in the bidirectional relationship with menu
 
-        restaurant.setMenu(menu); // restaurant is the owning side in the bidirectional relationship with menu
+        // if the restaurant has no menu, the menu is set as the restaurant's menu
+        if (restaurant.getMenu() == null) {
+            restaurant.setMenu(menu); // restaurant is the owning side in the bidirectional relationship with menu
+        } else {
+            // otherwise, the food in the menu is added to the restaurant's menu
+            restaurant.getMenu().getFoods().addAll(menu.getFoods());
+        }
         restaurantRepository.save(restaurant);
 
-        SuccessResponse response = new SuccessResponse("Menu added successfully");
+        SuccessResponse response = new SuccessResponse(200, "Menu added successfully");
         eventLogService.saveEventLog(EventLog.Event.EDIT_MENU, restaurant.getId());
 
-        return ResponseEntity.ok(menu);
+        return ResponseEntity.ok(response);
     }
 
     private Restaurant getRestaurantByEmail(String restaurantEmail) {
@@ -63,15 +68,16 @@ public class RestaurantService {
     public ResponseEntity<?> editMenu(String restaurantEmail, Long foodId, Food food) {
         Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
         if (!checkIfFoodIdExistsInMenu(foodId, restaurant)) {
-            ErrorResponse message = new ErrorResponse("Food id does not exist in menu");
-            return ResponseEntity.badRequest().body(message);
+            throw new NotFoundException("Food id does not exist in menu");
+
         }
 
         Menu menu = restaurant.getMenu();
-        menuService.editFood(foodId, food, menu);
+        Food editedFood = menuService.editFood(foodId, food, menu);
 
-        SuccessResponse message = new SuccessResponse("Food edited successfully");
         eventLogService.saveEventLog(EventLog.Event.EDIT_MENU, restaurant.getId());
+
+        SuccessResponse message = new SuccessResponse(200, "Food edited successfully", editedFood);
         return ResponseEntity.ok().body(message);
     }
 
@@ -83,8 +89,7 @@ public class RestaurantService {
     public ResponseEntity<?> deleteFood(String restaurantEmail, Long foodId) {
         Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
         if (!checkIfFoodIdExistsInMenu(foodId, restaurant)) {
-            ErrorResponse message = new ErrorResponse("Food id does not exist in menu");
-            return ResponseEntity.badRequest().body(message);
+            throw new NotFoundException("Food id does not exist in menu");
         }
 
         // there is a bidirectional relationship between menu and food that prevents Hibernate from deleting the food
@@ -98,7 +103,7 @@ public class RestaurantService {
         menuService.saveMenu(menu);
         foodService.deleteFoodById(foodId);
 
-        SuccessResponse message = new SuccessResponse("Food deleted successfully");
+        SuccessResponse message = new SuccessResponse(200, "Food deleted successfully");
         return ResponseEntity.ok().body(message);
     }
 
@@ -120,7 +125,7 @@ public class RestaurantService {
         food.setMenu(restaurant.getMenu());
 
         restaurant = restaurantRepository.save(restaurant);
-        SuccessResponse message = new SuccessResponse("Food added successfully");
+        SuccessResponse message = new SuccessResponse(200, "Food added successfully");
         eventLogService.saveEventLog(EventLog.Event.EDIT_MENU, restaurant.getId());
         return ResponseEntity.ok().body(message);
     }
@@ -133,7 +138,8 @@ public class RestaurantService {
                 .map(OrderDTO::new)
                 .toList();
 
-        GetOrdersResponse response = new GetOrdersResponse(orderDTOs);
+        SuccessResponse response = new SuccessResponse(200, "Orders retrieved successfully", orderDTOs);
+//        GetOrdersResponse response = new GetOrdersResponse(orderDTOs);
 
         return ResponseEntity.ok().body(response);
     }
@@ -142,12 +148,14 @@ public class RestaurantService {
         Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
 
         if (!checkIfOrderExistsInOrderList(orderId, restaurant)) {
-            ErrorResponse message = new ErrorResponse("Order not found in order list");
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+            throw new NotFoundException("Order not found in order list");
+
         }
 
         Order order = orderService.getOrderById(orderId);
-        return ResponseEntity.ok().body(order);
+
+        SuccessResponse response = new SuccessResponse(200, "Order retrieved successfully", order);
+        return ResponseEntity.ok().body(response);
     }
 
     private boolean checkIfOrderExistsInOrderList(Long orderId, Restaurant restaurant) {
@@ -159,29 +167,32 @@ public class RestaurantService {
         return restaurantRepository.findAll();
     }
 
-    public ResponseEntity<?> getRestaurantMenu(long restaurantId) {
+    public Menu getRestaurantMenu(long restaurantId) {
 
         Optional<Restaurant> optionalRestaurant = restaurantRepository.findById(restaurantId);
 
         if (optionalRestaurant.isEmpty()) {
-            ErrorResponse response = new ErrorResponse("Restaurant not found");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            throw new NotFoundException("Restaurant not found");
         }
 
-        Restaurant restaurant = (Restaurant) optionalRestaurant.get();
-        return ResponseEntity.ok().body(restaurant.getMenu());
+        Restaurant restaurant = optionalRestaurant.get();
+        return restaurant.getMenu();
+
     }
 
     public ResponseEntity<?> getMenu(String restaurantEmail) {
         Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
-        return ResponseEntity.ok().body(restaurant.getMenu());
+        Menu menu = restaurant.getMenu();
+
+        SuccessResponse response = new SuccessResponse(200, "Menu retrieved successfully", menu.getFoods());
+        return ResponseEntity.ok().body(response);
     }
 
     public void saveRestaurant(Restaurant restaurant) {
         restaurantRepository.save(restaurant);
     }
 
-    public List<?> getRestaurantOrders(long restaurantId) {
+    public List<Order> getRestaurantOrders(long restaurantId) {
         Restaurant restaurant = getRestaurantById(restaurantId);
         return restaurant.getOrders();
     }
