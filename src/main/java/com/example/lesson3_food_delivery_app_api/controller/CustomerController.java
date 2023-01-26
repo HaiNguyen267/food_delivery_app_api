@@ -2,31 +2,25 @@ package com.example.lesson3_food_delivery_app_api.controller;
 
 import com.example.lesson3_food_delivery_app_api.dto.request.*;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
-import com.example.lesson3_food_delivery_app_api.dto.response.RegisterResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
-import com.example.lesson3_food_delivery_app_api.entity.*;
 import com.example.lesson3_food_delivery_app_api.service.CustomerService;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/customer")
 @AllArgsConstructor
 public class CustomerController {
-    //TODO: swagger3 for this class
     private final CustomerService customerService;
+
 
     @ApiResponses(value = {
             @ApiResponse(
@@ -34,7 +28,7 @@ public class CustomerController {
                     description = "Customer registered successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = RegisterResponse.class),
+                            schema = @Schema(implementation = SuccessResponse.class),
                             examples = @ExampleObject(value = """
                                     {
                                         "status": 200,
@@ -82,28 +76,34 @@ public class CustomerController {
                                         "message": "All foods retrieved successfully",
                                         "data": [
                                             {
-                                                "id": 1,
+                                                "id": 19,
                                                 "name": "Pho",
-                                                "price": 15.0,
+                                                "price": 12.0,
                                                 "description": "Vietnamese famous food",
                                                 "imageUrl": null,
-                                                "rating": null
+                                                "rating": null,
+                                                "restaurantId": 2,
+                                                "numberOfComments": 0
                                             },
                                             {
-                                                "id": 2,
+                                                "id": 20,
                                                 "name": "Band mi",
                                                 "price": 2.0,
                                                 "description": "A kind of sandwich",
                                                 "imageUrl": null,
-                                                "rating": null
+                                                "rating": null,
+                                                "restaurantId": 2,
+                                                "numberOfComments": 0
                                             },
                                             {
-                                                "id": 3,
+                                                "id": 21,
                                                 "name": "Egg fried rice",
                                                 "price": 5.0,
                                                 "description": "Fried rice with eggs",
                                                 "imageUrl": null,
-                                                "rating": null
+                                                "rating": 5.0,
+                                                "restaurantId": 2,
+                                                "numberOfComments": 0
                                             }
                                         ]
                                     }
@@ -151,7 +151,6 @@ public class CustomerController {
         return customerService.viewAllRestaurants();
     }
 
-
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -170,7 +169,9 @@ public class CustomerController {
                                                 "price": 12.0,
                                                 "description": "Vietnamese famous food",
                                                 "imageUrl": null,
-                                                "rating": null
+                                                "rating": null,
+                                                "restaurantId": 2,
+                                                "numberOfComments": 0
                                             },
                                             {
                                                 "id": 20,
@@ -178,7 +179,9 @@ public class CustomerController {
                                                 "price": 2.0,
                                                 "description": "A kind of sandwich",
                                                 "imageUrl": null,
-                                                "rating": null
+                                                "rating": null,
+                                                "restaurantId": 2,
+                                                "numberOfComments": 0
                                             },
                                             {
                                                 "id": 21,
@@ -186,7 +189,9 @@ public class CustomerController {
                                                 "price": 5.0,
                                                 "description": "Fried rice with eggs",
                                                 "imageUrl": null,
-                                                "rating": 5.0
+                                                "rating": 5.0,
+                                                "restaurantId": 2,
+                                                "numberOfComments": 0
                                             }
                                         ]
                                     }
@@ -396,7 +401,6 @@ public class CustomerController {
     }
 
 
-
     private UserDetails getCurrentCustomer() {
         return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
@@ -452,4 +456,112 @@ public class CustomerController {
         String currentCustomerEmail = getCurrentCustomer().getUsername();
         return customerService.rateFood(currentCustomerEmail, foodRatingRequest);
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Search food successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SuccessResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                        "status": 200,
+                                        "message": "Search food successfully",
+                                        "data": [
+                                            {
+                                                "id": 22,
+                                                "name": "Noodle",
+                                                "price": 15.0,
+                                                "description": "Spicy",
+                                                "imageUrl": null,
+                                                "rating": null,
+                                                "restaurantId": 2,
+                                                "numberOfComments": 0
+                                            },
+                                            {
+                                                "id": 23,
+                                                "name": "Ramen Noodles",
+                                                "price": 25.0,
+                                                "description": "Japanese noodle",
+                                                "imageUrl": null,
+                                                "rating": null,
+                                                "restaurantId": 2,
+                                                "numberOfComments": 0
+                                            }
+                                        ]
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No results",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                        "status": 404,
+                                        "message": "No results"
+                                    }
+                                    """)
+                    )
+            )
+    })
+    @GetMapping("/searchFood")
+    public ResponseEntity<?> searchFood(@RequestParam String name) {
+        return customerService.searchFood(name);
+    }
+
+
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Search restaurant successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SuccessResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                        "status": 200,
+                                        "message": "Search restaurant successfully",
+                                        "data": [
+                                            {
+                                                "id": 2,
+                                                "name": "Two Bears Restaurant",
+                                                "address": "Hanoi",
+                                                "phone": "+8448291291"
+                                            },
+                                            {
+                                                "id": 3,
+                                                "name": "Two Princes Restaurant",
+                                                "address": "Ho Chi Minh City",
+                                                "phone": "+8447195721"
+                                            }
+                                        ]
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No results",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                        "status": 404,
+                                        "message": "No results"
+                                    }
+                                    """)
+                    )
+            )
+    })
+    @GetMapping("/searchRestaurant")
+    public ResponseEntity<?> searchRestaurant(@RequestParam String name) {
+        return customerService.searchRestaurant(name);
+    }
+
 }

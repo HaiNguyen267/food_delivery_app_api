@@ -1,22 +1,19 @@
 package com.example.lesson3_food_delivery_app_api.controller;
 
-import com.example.lesson3_food_delivery_app_api.dto.ChangeAccessRequest;
+import com.example.lesson3_food_delivery_app_api.dto.request.ChangeAccessRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.AdminRegistrationRequest;
-import com.example.lesson3_food_delivery_app_api.dto.request.CustomerRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
-import com.example.lesson3_food_delivery_app_api.dto.response.RegisterResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
-import com.example.lesson3_food_delivery_app_api.entity.*;
+import com.example.lesson3_food_delivery_app_api.entity.Customer;
 import com.example.lesson3_food_delivery_app_api.service.*;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +24,7 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
-
+    private final UserService userService;
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -177,7 +174,7 @@ public class AdminController {
                                                 "name": "The Coconut Restaurant",
                                                 "address": "Hanoi",
                                                 "phone": "+8448211291"
-                                            }                          
+                                            }                       
                                         ]
                                     }
                                     """)
@@ -376,7 +373,7 @@ public class AdminController {
                                     {
                                         "status": 200,
                                         "message": "All delivery partners retrieved successfully",
-                                        "data": [                                      
+                                        "data": [                                   
                                             {
                                                 "id": 10,
                                                 "name": "Express Company",
@@ -445,4 +442,59 @@ public class AdminController {
     public ResponseEntity<?> getAllDeliveryOrder(@PathVariable long deliveryPartnerId) {
         return adminService.getAllDeliveryOrder(deliveryPartnerId);
     }
+
+
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Search user successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = SuccessResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                        "status": 200,
+                                        "message": "Search user successfully",
+                                        "data": [
+                                            {
+                                                "id": 1,
+                                                "email": "cus2@c.com",
+                                                "role": "CUSTOMER",
+                                                "locked": false
+                                            },
+                                            {
+                                                "id": 8,
+                                                "email": "cus3@c.com",
+                                                "role": "CUSTOMER",
+                                                "locked": false
+                                            },
+                                            {
+                                                "id": 9,
+                                                "email": "cus5@c.com",
+                                                "role": "CUSTOMER",
+                                                "locked": false
+                                            }
+                                        ]
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No results",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                          "status": 404,
+                                          "message": "No results"
+                                    }
+                                    """)
+                    )
+            )
+    })
+    @GetMapping("/searchUser")
+    public ResponseEntity<?> searchUser(@RequestParam String email) {
+        return userService.searchByEmail(email);
+    }
+
 }

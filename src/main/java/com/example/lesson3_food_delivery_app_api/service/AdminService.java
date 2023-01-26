@@ -1,15 +1,11 @@
 package com.example.lesson3_food_delivery_app_api.service;
 
-import com.example.lesson3_food_delivery_app_api.dto.ChangeAccessRequest;
+import com.example.lesson3_food_delivery_app_api.dto.request.ChangeAccessRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.AdminRegistrationRequest;
-import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.*;
-import com.example.lesson3_food_delivery_app_api.repository.AdminRepository;
-import com.example.lesson3_food_delivery_app_api.security.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -2,12 +2,9 @@ package com.example.lesson3_food_delivery_app_api.controller;
 
 import com.example.lesson3_food_delivery_app_api.dto.request.RestaurantRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
-import com.example.lesson3_food_delivery_app_api.dto.response.GetOrdersResponse;
-import com.example.lesson3_food_delivery_app_api.dto.response.RegisterResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.Food;
 import com.example.lesson3_food_delivery_app_api.entity.Menu;
-import com.example.lesson3_food_delivery_app_api.entity.Order;
 import com.example.lesson3_food_delivery_app_api.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -212,7 +209,7 @@ public class RestaurantController {
                     description = "Get orders successfully",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = GetOrdersResponse.class),
+                                    schema = @Schema(implementation = SuccessResponse.class),
                                     examples = @ExampleObject(value = """
                                             {
                                                 "status": 200,

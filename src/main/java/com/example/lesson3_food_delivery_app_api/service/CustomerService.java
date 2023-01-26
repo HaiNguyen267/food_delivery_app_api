@@ -4,7 +4,8 @@ import com.example.lesson3_food_delivery_app_api.dto.request.CustomerRegistratio
 import com.example.lesson3_food_delivery_app_api.dto.request.FoodCommentRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.FoodRatingRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.OrderFoodRequest;
-import com.example.lesson3_food_delivery_app_api.dto.response.OrderFoodResponseDTO;
+import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.FoodOrderDTO;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.*;
 import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
@@ -12,6 +13,7 @@ import com.example.lesson3_food_delivery_app_api.exception.RatingInvalidExceptio
 import com.example.lesson3_food_delivery_app_api.exception.UserHasNotOrderedFoodException;
 import com.example.lesson3_food_delivery_app_api.repository.CustomerRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -143,7 +145,7 @@ public class CustomerService {
         orderService.saveOrder(order);
         eventLogService.saveEventLog(EventLog.Event.ORDER_FOOD, customer.getId());
 
-        OrderFoodResponseDTO orderFoodResponse = OrderFoodResponseDTO.builder()
+        FoodOrderDTO orderFoodResponse = FoodOrderDTO.builder()
                 .foodName(food.getName())
                 .orderId(order.getId())
                 .foodId(order.getFood().getId())
@@ -184,5 +186,28 @@ public class CustomerService {
         List<Order> unDeliveredOrdersOfCustomer = orderService.findUnDeliveredOrdersOfCustomer(currentCustomerEmail);
         SuccessResponse response = new SuccessResponse(200, "Orders retrieved successfully", unDeliveredOrdersOfCustomer);
         return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<?> searchFood(String name) {
+        List<Food> foods = foodService.getFoodsByNameContaining(name);
+
+        if (foods.size() == 0) {
+            ErrorResponse response = new ErrorResponse(404, "No results");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } else {
+            SuccessResponse response = new SuccessResponse(200, "Search food successfully", foods);
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    public ResponseEntity<?> searchRestaurant(String name) {
+        List<Restaurant> restaurants =  restaurantService.getRestaurantsByNameContaining(name);
+        if (restaurants.size() == 0) {
+            ErrorResponse response = new ErrorResponse(404, "No results");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } else {
+            SuccessResponse response = new SuccessResponse(200, "Search restaurant successfully", restaurants);
+            return ResponseEntity.ok(response);
+        }
     }
 }

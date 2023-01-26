@@ -1,15 +1,12 @@
 package com.example.lesson3_food_delivery_app_api.service;
 
 import com.example.lesson3_food_delivery_app_api.dto.request.RestaurantRegistrationRequest;
-import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
-import com.example.lesson3_food_delivery_app_api.dto.response.GetOrdersResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.FoodOrderDTO;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.*;
 import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
 import com.example.lesson3_food_delivery_app_api.repository.RestaurantRepository;
-import com.example.lesson3_food_delivery_app_api.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +14,6 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.lesson3_food_delivery_app_api.dto.response.GetOrdersResponse.OrderDTO;
 
 @Service
 @AllArgsConstructor
@@ -134,12 +130,11 @@ public class RestaurantService {
         Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
         List<Order> orders = restaurant.getOrders();
 
-        List<OrderDTO> orderDTOs = orders.stream()
-                .map(OrderDTO::new)
+        List<FoodOrderDTO> orderDTOs = orders.stream()
+                .map(FoodOrderDTO::new)
                 .toList();
 
         SuccessResponse response = new SuccessResponse(200, "Orders retrieved successfully", orderDTOs);
-//        GetOrdersResponse response = new GetOrdersResponse(orderDTOs);
 
         return ResponseEntity.ok().body(response);
     }
@@ -200,5 +195,9 @@ public class RestaurantService {
     private Restaurant getRestaurantById(long restaurantId) {
         return (Restaurant) restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new NotFoundException("Restaurant not found"));
+    }
+
+    public List<Restaurant> getRestaurantsByNameContaining(String name) {
+        return restaurantRepository.findByNameContainingIgnoreCase(name);
     }
 }

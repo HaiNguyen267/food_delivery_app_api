@@ -27,6 +27,7 @@ public class Food {
     private String description;
     private String imageUrl;
 
+
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "food")
     private List<Rating> ratings = new ArrayList<>();
@@ -40,15 +41,13 @@ public class Food {
     private Menu menu;
 
 
-    private Long getRestaurantId() {
+    public Long getRestaurantId() {
         return menu.getRestaurant().getId();
     }
-    @JsonIgnore
-    public Long getMenuId() {
-        return menu.getId();
-    }
+
 
     public Double getRating() {
+        // when there is no rating, then  return null
         if (ratings.size() == 0) {
             return null;
         }
@@ -59,7 +58,7 @@ public class Food {
                 .orElse(0);
     }
 
-    public int numberOfComment() {
+    public int getNumberOfComments() {
         return comments.size();
     }
 

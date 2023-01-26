@@ -1,29 +1,20 @@
 package com.example.lesson3_food_delivery_app_api.controller;
 
 import com.example.lesson3_food_delivery_app_api.dto.request.DeliveryPartnerRegistrationRequest;
-import com.example.lesson3_food_delivery_app_api.dto.request.RestaurantRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
-import com.example.lesson3_food_delivery_app_api.dto.response.RegisterResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
-import com.example.lesson3_food_delivery_app_api.entity.DeliveryPartner;
-import com.example.lesson3_food_delivery_app_api.entity.Order;
 import com.example.lesson3_food_delivery_app_api.service.DeliveryPartnerService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/delivery-partner")
@@ -286,7 +277,4 @@ public class DeliveryPartnerController {
     private UserDetails getCurrentDeliveryPartner() {
         return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
-
-
-
 }

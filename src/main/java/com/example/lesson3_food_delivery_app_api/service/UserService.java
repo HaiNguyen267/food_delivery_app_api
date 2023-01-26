@@ -1,6 +1,6 @@
 package com.example.lesson3_food_delivery_app_api.service;
 
-import com.example.lesson3_food_delivery_app_api.dto.ChangeAccessRequest;
+import com.example.lesson3_food_delivery_app_api.dto.request.ChangeAccessRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.AdminRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.CustomerRegistrationRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.DeliveryPartnerRegistrationRequest;
@@ -8,6 +8,7 @@ import com.example.lesson3_food_delivery_app_api.dto.request.RestaurantRegistrat
 import com.example.lesson3_food_delivery_app_api.dto.response.AccessToken;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
+import com.example.lesson3_food_delivery_app_api.dto.response.UserDTO;
 import com.example.lesson3_food_delivery_app_api.entity.*;
 import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
 import com.example.lesson3_food_delivery_app_api.exception.RegistrationException;
@@ -15,13 +16,17 @@ import com.example.lesson3_food_delivery_app_api.exception.WrongUsernamePassword
 import com.example.lesson3_food_delivery_app_api.repository.*;
 import com.example.lesson3_food_delivery_app_api.security.Role;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
-import static com.example.lesson3_food_delivery_app_api.dto.ChangeAccessRequest.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.example.lesson3_food_delivery_app_api.dto.request.ChangeAccessRequest.*;
 
 @Service
 @AllArgsConstructor
@@ -177,7 +182,6 @@ public class UserService {
 
 
     public User getUserById(long userId) {
-        // TODO: NOT FOUND EXCEPTION
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
@@ -208,4 +212,20 @@ public class UserService {
     }
 
 
+    public ResponseEntity<?> searchByEmail(String name) {
+        List<User> users = userRepository.findByEmailContainingIgnoreCase(name);
+
+        if (users.isEmpty()) {
+            ErrorResponse response = new ErrorResponse(404, "No results");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } else {
+            // convert to DTO, so that the admin can see email, role and locked status
+            List<UserDTO> userDTOS = users.stream()
+                    .map(UserDTO::new)
+                    .toList();
+            SuccessResponse response = new SuccessResponse(200, "Search user successfully", userDTOS);
+            return ResponseEntity.ok(response);
+        }
+
+    }
 }
