@@ -45,6 +45,9 @@ public class Food {
         return menu.getRestaurant().getId();
     }
 
+    public String getRestaurantName() {
+        return menu.getRestaurant().getName();
+    }
 
     public Double getRating() {
         // when there is no rating, then  return null

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerController {
     private final CustomerService customerService;
 
-
+    // TODO: swagger 3 for admin, customer, delivery partne, restaurant for the change of food order
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -229,14 +229,44 @@ public class CustomerController {
                                     {
                                         "status": 200,
                                         "message": "Food ordered successfully",
-                                        "data": {
-                                            "foodId": 21,
-                                            "restaurantName": "Two Bears Restaurant",
-                                            "orderId": 3,
-                                            "foodName": "Egg fried rice",
-                                            "quantity": 5,
-                                            "price": 25.0
-                                        }
+                                        "data": [
+                                            {
+                                                "orderId": 10,
+                                                "foodItems": [
+                                                    {
+                                                        "foodId": 5,
+                                                        "foodName": "Extra Tips",
+                                                        "price": 10.5,
+                                                        "quantity": 3
+                                                    }
+                                                ],
+                                                "restaurantId": 1,
+                                                "restaurantName": "Restaurant A",
+                                                "deliveryPartnerId": null,
+                                                "totalPrice": 31.5
+                                            },
+                                            {
+                                                "orderId": 11,
+                                                "foodItems": [
+                                                    {
+                                                        "foodId": 10,
+                                                        "foodName": "Sticky Rice",
+                                                        "price": 22.0,
+                                                        "quantity": 5
+                                                    },
+                                                    {
+                                                        "foodId": 12,
+                                                        "foodName": "Pho",
+                                                        "price": 13.0,
+                                                        "quantity": 1
+                                                    }
+                                                ],
+                                                "restaurantId": 3,
+                                                "restaurantName": "Restaurant C",
+                                                "deliveryPartnerId": null,
+                                                "totalPrice": 123.0
+                                            }
+                                        ]
                                     }
                                     """)
                     )
@@ -250,7 +280,7 @@ public class CustomerController {
                             examples = @ExampleObject(value = """
                                     {
                                         "status": 404,
-                                        "message": "Food not found"
+                                        "message": "Food not found for id: 52"
                                     }
                                     """)
                     )
@@ -312,33 +342,68 @@ public class CustomerController {
                             schema = @Schema(implementation = SuccessResponse.class),
                             examples = @ExampleObject(value = """
                                     {
-                                        "status": 200,
-                                        "message": "Orders retrieved successfully",
-                                        "data": [
-                                            {
-                                                "id": 2,
-                                                "quantity": 5,
-                                                "price": 25.0,
-                                                "orderTime": "2023-01-24 18:26",
-                                                "deliveryTime": null,
-                                                "status": "READY",
-                                                "deliveryPartnerName": null,
-                                                "foodName": "Egg fried rice",
-                                                "restaurantName": "Two Bears Restaurant"
-                                            },
-                                            {
-                                                "id": 3,
-                                                "quantity": 5,
-                                                "price": 25.0,
-                                                "orderTime": "2023-01-24 20:20",
-                                                "deliveryTime": null,
-                                                "status": "READY",
-                                                "deliveryPartnerName": null,
-                                                "foodName": "Egg fried rice",
-                                                "restaurantName": "Two Bears Restaurant"
-                                            }
-                                        ]
-                                    }
+                                         "status": 200,
+                                         "message": "Orders retrieved successfully",
+                                         "data": [
+                                             {
+                                                 "orderId": 9,
+                                                 "foodItems": [
+                                                     {
+                                                         "foodId": 10,
+                                                         "foodName": "Sticky Rice",
+                                                         "price": 22.0,
+                                                         "quantity": 5
+                                                     },
+                                                     {
+                                                         "foodId": 12,
+                                                         "foodName": "Pho",
+                                                         "price": 13.0,
+                                                         "quantity": 1
+                                                     }
+                                                 ],
+                                                 "restaurantId": 3,
+                                                 "restaurantName": "Restaurant C",
+                                                 "deliveryPartnerId": null,
+                                                 "totalPrice": 123.0
+                                             },
+                                             {
+                                                 "orderId": 10,
+                                                 "foodItems": [
+                                                     {
+                                                         "foodId": 5,
+                                                         "foodName": "Extra Tips",
+                                                         "price": 10.5,
+                                                         "quantity": 3
+                                                     }
+                                                 ],
+                                                 "restaurantId": 1,
+                                                 "restaurantName": "Restaurant A",
+                                                 "deliveryPartnerId": null,
+                                                 "totalPrice": 31.5
+                                             },
+                                             {
+                                                 "orderId": 11,
+                                                 "foodItems": [
+                                                     {
+                                                         "foodId": 10,
+                                                         "foodName": "Sticky Rice",
+                                                         "price": 22.0,
+                                                         "quantity": 5
+                                                     },
+                                                     {
+                                                         "foodId": 12,
+                                                         "foodName": "Pho",
+                                                         "price": 13.0,
+                                                         "quantity": 1
+                                                     }
+                                                 ],
+                                                 "restaurantId": 3,
+                                                 "restaurantName": "Restaurant C",
+                                                 "deliveryPartnerId": null,
+                                                 "totalPrice": 123.0
+                                             }
+                                         ]
+                                   }
                                     """)
                     )
             )

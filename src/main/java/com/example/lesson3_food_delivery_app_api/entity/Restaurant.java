@@ -1,7 +1,6 @@
 package com.example.lesson3_food_delivery_app_api.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,11 +25,11 @@ public class Restaurant extends User {
     private String phone;
 
     @JsonIgnore
-    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @OneToOne(cascade = CascadeType.ALL)
     private Menu menu;
 
     @JsonIgnore
-    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, mappedBy = "restaurant")
-    private List<Order> orders = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "restaurant")
+    private List<FoodOrder> orders = new ArrayList<>();
 
 }

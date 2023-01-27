@@ -25,7 +25,7 @@ public class RestaurantService {
 
     private final FoodService foodService;
 
-    private final OrderService orderService;
+    private final FoodOrderService orderService;
 
     private final EventLogService eventLogService;
 
@@ -128,7 +128,7 @@ public class RestaurantService {
 
     public ResponseEntity<?> getOrders(String restaurantEmail) {
         Restaurant restaurant = getRestaurantByEmail(restaurantEmail);
-        List<Order> orders = restaurant.getOrders();
+        List<FoodOrder> orders = restaurant.getOrders();
 
         List<FoodOrderDTO> orderDTOs = orders.stream()
                 .map(FoodOrderDTO::new)
@@ -147,9 +147,10 @@ public class RestaurantService {
 
         }
 
-        Order order = orderService.getOrderById(orderId);
+        FoodOrder order = orderService.getOrderById(orderId);
 
-        SuccessResponse response = new SuccessResponse(200, "Order retrieved successfully", order);
+        FoodOrderDTO orderDTO = new FoodOrderDTO(order);
+        SuccessResponse response = new SuccessResponse(200, "Order retrieved successfully", orderDTO);
         return ResponseEntity.ok().body(response);
     }
 
@@ -187,12 +188,12 @@ public class RestaurantService {
         restaurantRepository.save(restaurant);
     }
 
-    public List<Order> getRestaurantOrders(long restaurantId) {
+    public List<FoodOrder> getRestaurantOrders(long restaurantId) {
         Restaurant restaurant = getRestaurantById(restaurantId);
         return restaurant.getOrders();
     }
 
-    private Restaurant getRestaurantById(long restaurantId) {
+    public Restaurant getRestaurantById(long restaurantId) {
         return (Restaurant) restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new NotFoundException("Restaurant not found"));
     }

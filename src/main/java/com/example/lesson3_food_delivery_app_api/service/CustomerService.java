@@ -6,6 +6,7 @@ import com.example.lesson3_food_delivery_app_api.dto.request.FoodRatingRequest;
 import com.example.lesson3_food_delivery_app_api.dto.request.OrderFoodRequest;
 import com.example.lesson3_food_delivery_app_api.dto.response.ErrorResponse;
 import com.example.lesson3_food_delivery_app_api.dto.response.FoodOrderDTO;
+import com.example.lesson3_food_delivery_app_api.entity.FoodOrderItem;
 import com.example.lesson3_food_delivery_app_api.dto.response.SuccessResponse;
 import com.example.lesson3_food_delivery_app_api.entity.*;
 import com.example.lesson3_food_delivery_app_api.exception.NotFoundException;
@@ -19,9 +20,13 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.example.lesson3_food_delivery_app_api.dto.request.OrderFoodRequest.*;
 
 @Service
 @AllArgsConstructor
@@ -32,7 +37,7 @@ public class CustomerService {
     private final FoodService foodService;
     private final RestaurantService restaurantService;
     private final EventLogService eventLogService;
-    private final OrderService orderService;
+    private final FoodOrderService foodOrderService;
     private final UserService userService;
 
     public ResponseEntity<?> register(CustomerRegistrationRequest customerRegistrationRequest) {
@@ -120,7 +125,12 @@ public class CustomerService {
     }
 
     private boolean checkIfUserHasOrderedFood(Customer customer, Food food) {
-        return customer.getOrders().stream().anyMatch(order -> order.getFood().getId().equals(food.getId()));
+        List<Food> alLOrderedFoods = customer.getOrders().stream()
+                .flatMap(order -> order.getFoodItems().stream())
+                .map(FoodOrderItem::getFood)
+                .toList();
+
+        return alLOrderedFoods.contains(food);
     }
 
     @Transactional
@@ -128,35 +138,65 @@ public class CustomerService {
 
         Customer customer = getCustomerByEmail(currentCustomerEmail);
 
-        Food food = foodService.getFoodById(orderFoodRequest.getFoodId());
-        Restaurant restaurant = food.getMenu().getRestaurant();
 
-        long now = new Date().getTime();
-        Order order = Order.builder()
-                .food(food)
-                .customer(customer)
-                .restaurant(restaurant)
-                .status(OrderStatus.READY)
-                .orderTime(LocalDateTime.now())
-                .quantity(orderFoodRequest.getQuantity())
-                .build();
+        List<FoodOrder> foodOrders = createAndSaveFoodOrder(customer, orderFoodRequest);
 
-        restaurant.getOrders().add(order);
-        orderService.saveOrder(order);
+        // convert to dtos to send back to the client
+        List<FoodOrderDTO> foodOrderDTOs = foodOrders.stream().map(FoodOrderDTO::new).toList();
+
         eventLogService.saveEventLog(EventLog.Event.ORDER_FOOD, customer.getId());
 
-        FoodOrderDTO orderFoodResponse = FoodOrderDTO.builder()
-                .foodName(food.getName())
-                .orderId(order.getId())
-                .foodId(order.getFood().getId())
-                .restaurantName(order.getRestaurantName())
-                .quantity(order.getQuantity())
-                .price(order.getPrice())
-                .build();
-
-        SuccessResponse response = new SuccessResponse(200, "Food ordered successfully", orderFoodResponse);
+        SuccessResponse response = new SuccessResponse(200, "Food ordered successfully", foodOrderDTOs);
 
         return ResponseEntity.ok(response);
+    }
+
+    private List<FoodOrder> createAndSaveFoodOrder(Customer customer, OrderFoodRequest orderFoodRequest) {
+
+        // get food ids from the order request
+        List<Long> foodIds = orderFoodRequest.getOrder()
+                .stream()
+                .map(FoodInfo::getFoodId)
+                .toList();
+
+        // an order is made from foods of the same restaurant
+        // if foods come from different restaurants, they made up multiple orders
+        Map<Long, List<Food>> orderByRestaurant = foodService.getFoodsByIds(foodIds)
+                .stream()
+                .collect(Collectors.groupingBy(Food::getRestaurantId));
+
+
+        List<FoodOrder> foodOrders = new ArrayList<>();
+        for (Map.Entry<Long, List<Food>> entry : orderByRestaurant.entrySet()) {
+            Restaurant restaurant = restaurantService.getRestaurantById(entry.getKey());
+
+            // List<Food> -> List<FoodOrderItem>
+            List<Food> foodByRestaurant = entry.getValue();
+            List<FoodOrderItem> foodItems = foodByRestaurant.stream()
+                    .map(food -> FoodOrderItem.builder()
+                            .food(food)
+                            .quantity(orderFoodRequest.getQuantityOfFood(food.getId()))
+                            .build()
+                    )
+                    .toList();
+
+            // create an order
+            FoodOrder foodOrder = FoodOrder.builder()
+                    .customer(customer)
+                    .foodItems(foodItems)
+                    .status(OrderStatus.READY)
+                    .restaurant(restaurant)
+                    .orderTime(LocalDateTime.now())
+                    .build();
+
+            // save the order
+            foodOrderService.saveOrder(foodOrder);// save order it will cascade to save the food items
+            restaurant.getOrders().add(foodOrder); // add the order to the restaurant
+
+            foodOrders.add(foodOrder);
+        }
+
+        return foodOrders;
     }
 
     public ResponseEntity<?> getFoodComments(Long foodId) {
@@ -170,7 +210,7 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
-    public List<Order> findAllUnDeliveredOrders(long customerId) {
+    public List<FoodOrder> findAllUnDeliveredOrders(long customerId) {
         // check if customer exists
         Customer customer = getCustomerById(customerId);
 
@@ -183,8 +223,17 @@ public class CustomerService {
 
 
     public ResponseEntity<?> getOrders(String currentCustomerEmail) {
-        List<Order> unDeliveredOrdersOfCustomer = orderService.findUnDeliveredOrdersOfCustomer(currentCustomerEmail);
-        SuccessResponse response = new SuccessResponse(200, "Orders retrieved successfully", unDeliveredOrdersOfCustomer);
+        // get all orders of the customer which have  READY or DELIVERING status
+//        Customer customer = getCustomerByEmail(currentCustomerEmail); // using JPA
+//        List<FoodOrder> unDeliveredOrdersOfCustomer = customer.getOrders().stream().filter(foodOrder -> foodOrder.getStatus() != OrderStatus.DELIVERED).toList();
+
+        List<FoodOrder> unDeliveredOrdersOfCustomer = foodOrderService.findUnDeliveredOrdersOfCustomer(currentCustomerEmail); // using JPQL
+
+        List<FoodOrderDTO> foodOrderDTOS = unDeliveredOrdersOfCustomer
+                .stream()
+                .map(FoodOrderDTO::new)
+                .toList();
+        SuccessResponse response = new SuccessResponse(200, "Orders retrieved successfully", foodOrderDTOS);
         return ResponseEntity.ok(response);
     }
 

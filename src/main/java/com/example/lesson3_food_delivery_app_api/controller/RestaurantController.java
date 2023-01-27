@@ -216,11 +216,34 @@ public class RestaurantController {
                                                 "message": "Orders retrieved successfully",
                                                 "data": [
                                                     {
-                                                        "id": 1,
-                                                        "price": 75.0,
-                                                        "foodId": 1,
-                                                        "deliveryPartnerId": 3,
-                                                        "status": "DELIVERED"
+                                                        "orderId": 8,
+                                                        "foodItems": [
+                                                            {
+                                                                "foodId": 1,
+                                                                "foodName": "Pho",
+                                                                "price": 15.0,
+                                                                "quantity": 3
+                                                            }
+                                                        ],
+                                                        "restaurantId": 1,
+                                                        "restaurantName": "Restaurant A",
+                                                        "deliveryPartnerId": 13,
+                                                        "totalPrice": 45.0
+                                                    },
+                                                    {
+                                                        "orderId": 10,
+                                                        "foodItems": [
+                                                            {
+                                                                "foodId": 5,
+                                                                "foodName": "Extra Tips",
+                                                                "price": 10.5,
+                                                                "quantity": 3
+                                                            }
+                                                        ],
+                                                        "restaurantId": 1,
+                                                        "restaurantName": "Restaurant A",
+                                                        "deliveryPartnerId": 13,
+                                                        "totalPrice": 31.5
                                                     }
                                                 ]
                                             }
@@ -295,19 +318,23 @@ public class RestaurantController {
                                     schema = @Schema(implementation = SuccessResponse.class),
                                     examples = @ExampleObject(value = """
                                             {
-                                                  "status": 200,
-                                                  "message": "Order retrieved successfully",
-                                                  "data": {
-                                                      "id": 1,
-                                                      "quantity": 5,
-                                                      "price": 75.0,
-                                                      "orderTime": "2023-01-24 12:28",
-                                                      "deliveryTime": "2023-01-24 12:32",
-                                                      "status": "DELIVERED",
-                                                      "restaurantName": "Two Bears Restaurant",
-                                                      "foodName": "Pho",
-                                                      "deliveryPartnerName": "Express Company"
-                                                  }
+                                                "status": 200,
+                                                "message": "Order retrieved successfully",
+                                                "data": {
+                                                    "orderId": 10,
+                                                    "foodItems": [
+                                                        {
+                                                            "foodId": 5,
+                                                            "foodName": "Extra Tips",
+                                                            "price": 10.5,
+                                                            "quantity": 3
+                                                        }
+                                                    ],
+                                                    "restaurantId": 1,
+                                                    "restaurantName": "Restaurant A",
+                                                    "deliveryPartnerId": 13,
+                                                    "totalPrice": 31.5
+                                                }
                                             }
                                             """)
 

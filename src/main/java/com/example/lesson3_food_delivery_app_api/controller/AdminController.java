@@ -198,38 +198,35 @@ public class AdminController {
                                         "message": "Restaurant orders retrieved successfully",
                                         "data": [
                                             {
-                                                "id": 1,
-                                                "quantity": 5,
-                                                "price": 75.0,
-                                                "orderTime": "2023-01-24 12:28",
-                                                "deliveryTime": "2023-01-24 12:32",
-                                                "status": "DELIVERED",
-                                                "foodName": "Pho",
-                                                "deliveryPartnerName": "Express Company",
-                                                "restaurantName": "Two Bears Restaurant"
+                                                "orderId": 8,
+                                                "foodItems": [
+                                                    {
+                                                        "foodId": 1,
+                                                        "foodName": "Pho",
+                                                        "price": 15.0,
+                                                        "quantity": 3
+                                                    }
+                                                ],
+                                                "restaurantId": 1,
+                                                "restaurantName": "Restaurant A",
+                                                "deliveryPartnerId": 13,
+                                                "totalPrice": 45.0
                                             },
                                             {
-                                                "id": 2,
-                                                "quantity": 5,
-                                                "price": 25.0,
-                                                "orderTime": "2023-01-24 18:26",
-                                                "deliveryTime": "2023-01-24 20:45",
-                                                "status": "DELIVERED",
-                                                "foodName": "Egg fried rice",
-                                                "deliveryPartnerName": "Quick Move Company",
-                                                "restaurantName": "Two Bears Restaurant"
-                                            },
-                                            {
-                                                "id": 3,
-                                                "quantity": 5,
-                                                "price": 25.0,
-                                                "orderTime": "2023-01-24 20:20",
-                                                "deliveryTime": "2023-01-24 20:52",
-                                                "status": "DELIVERED",
-                                                "foodName": "Egg fried rice",
-                                                "deliveryPartnerName": "Quick Move Company",
-                                                "restaurantName": "Two Bears Restaurant"
-                                            },
+                                                "orderId": 10,
+                                                "foodItems": [
+                                                    {
+                                                        "foodId": 5,
+                                                        "foodName": "Extra Tips",
+                                                        "price": 10.5,
+                                                        "quantity": 3
+                                                    }
+                                                ],
+                                                "restaurantId": 1,
+                                                "restaurantName": "Restaurant A",
+                                                "deliveryPartnerId": null,
+                                                "totalPrice": 31.5
+                                            }
                                         ]
                                     }
                                     """)
@@ -305,37 +302,61 @@ public class AdminController {
                                         "message": "All delivery orders of customer retrieved successfully",
                                         "data": [
                                             {
-                                                "id": 7,
-                                                "quantity": 5,
-                                                "price": 60.0,
-                                                "orderTime": "2023-01-25 09:41",
-                                                "deliveryTime": null,
-                                                "status": "READY",
-                                                "foodName": "Pho",
-                                                "deliveryPartnerName": null,
-                                                "restaurantName": "Two Bears Restaurant"
+                                                "orderId": 9,
+                                                "foodItems": [
+                                                    {
+                                                        "foodId": 10,
+                                                        "foodName": "Sticky Rice",
+                                                        "price": 22.0,
+                                                        "quantity": 5
+                                                    },
+                                                    {
+                                                        "foodId": 12,
+                                                        "foodName": "Pho",
+                                                        "price": 13.0,
+                                                        "quantity": 1
+                                                    }
+                                                ],
+                                                "restaurantId": 3,
+                                                "restaurantName": "Restaurant C",
+                                                "deliveryPartnerId": null,
+                                                "totalPrice": 123.0
                                             },
                                             {
-                                                "id": 8,
-                                                "quantity": 5,
-                                                "price": 10.0,
-                                                "orderTime": "2023-01-25 09:41",
-                                                "deliveryTime": null,
-                                                "status": "READY",
-                                                "foodName": "Band mi",
-                                                "deliveryPartnerName": null,
-                                                "restaurantName": "Two Bears Restaurant"
+                                                "orderId": 10,
+                                                "foodItems": [
+                                                    {
+                                                        "foodId": 5,
+                                                        "foodName": "Extra Tips",
+                                                        "price": 10.5,
+                                                        "quantity": 3
+                                                    }
+                                                ],
+                                                "restaurantId": 1,
+                                                "restaurantName": "Restaurant A",
+                                                "deliveryPartnerId": null,
+                                                "totalPrice": 31.5
                                             },
                                             {
-                                                "id": 9,
-                                                "quantity": 5,
-                                                "price": 25.0,
-                                                "orderTime": "2023-01-25 09:41",
-                                                "deliveryTime": null,
-                                                "status": "READY",
-                                                "foodName": "Egg fried rice",
-                                                "deliveryPartnerName": null,
-                                                "restaurantName": "Two Bears Restaurant"
+                                                "orderId": 11,
+                                                "foodItems": [
+                                                    {
+                                                        "foodId": 10,
+                                                        "foodName": "Sticky Rice",
+                                                        "price": 22.0,
+                                                        "quantity": 5
+                                                    },
+                                                    {
+                                                        "foodId": 12,
+                                                        "foodName": "Pho",
+                                                        "price": 13.0,
+                                                        "quantity": 1
+                                                    }
+                                                ],
+                                                "restaurantId": 3,
+                                                "restaurantName": "Restaurant C",
+                                                "deliveryPartnerId": null,
+                                                "totalPrice": 123.0
                                             }
                                         ]
                                     }
@@ -371,21 +392,26 @@ public class AdminController {
                             schema = @Schema(implementation = SuccessResponse.class),
                             examples = @ExampleObject(value = """
                                     {
-                                        "status": 200,
-                                        "message": "All delivery partners retrieved successfully",
-                                        "data": [                                   
-                                            {
-                                                "id": 10,
-                                                "name": "Express Company",
-                                                "deliveryTimeAverage": null
-                                            },
-                                            {
-                                                "id": 11,
-                                                "name": "Quick Move Company",
-                                                "deliveryTimeAverage": 84.5
-                                            }
-                                        ]
-                                    }
+                                         "status": 200,
+                                         "message": "All delivery orders of delivery partner retrieved successfully",
+                                         "data": [
+                                             {
+                                                 "orderId": 8,
+                                                 "foodItems": [
+                                                     {
+                                                         "foodId": 1,
+                                                         "foodName": "Pho",
+                                                         "price": 15.0,
+                                                         "quantity": 3
+                                                     }
+                                                 ],
+                                                 "restaurantId": 1,
+                                                 "restaurantName": "Restaurant A",
+                                                 "deliveryPartnerId": 13,
+                                                 "totalPrice": 45.0
+                                             }
+                                         ]
+                                     }
                                     """)
                     )
             )

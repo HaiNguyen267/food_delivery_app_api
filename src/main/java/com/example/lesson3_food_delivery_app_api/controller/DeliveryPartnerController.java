@@ -79,15 +79,61 @@ public class DeliveryPartnerController {
                                                 "message": "Ready orders retrieved successfully",
                                                 "data": [
                                                     {
-                                                        "id": 3,
-                                                        "quantity": 5,
-                                                        "price": 25.0,
-                                                        "orderTime": "2023-01-24 20:20",
-                                                        "deliveryTime": null,
-                                                        "status": "READY",
-                                                        "restaurantName": "Two Bears Restaurant",
-                                                        "foodName": "Egg fried rice",
-                                                        "deliveryPartnerName": null
+                                                        "orderId": 9,
+                                                        "foodItems": [
+                                                            {
+                                                                "foodId": 10,
+                                                                "foodName": "Sticky Rice",
+                                                                "price": 22.0,
+                                                                "quantity": 5
+                                                            },
+                                                            {
+                                                                "foodId": 12,
+                                                                "foodName": "Pho",
+                                                                "price": 13.0,
+                                                                "quantity": 1
+                                                            }
+                                                        ],
+                                                        "restaurantId": 3,
+                                                        "restaurantName": "Restaurant C",
+                                                        "deliveryPartnerId": null,
+                                                        "totalPrice": 123.0
+                                                    },
+                                                    {
+                                                        "orderId": 10,
+                                                        "foodItems": [
+                                                            {
+                                                                "foodId": 5,
+                                                                "foodName": "Extra Tips",
+                                                                "price": 10.5,
+                                                                "quantity": 3
+                                                            }
+                                                        ],
+                                                        "restaurantId": 1,
+                                                        "restaurantName": "Restaurant A",
+                                                        "deliveryPartnerId": null,
+                                                        "totalPrice": 31.5
+                                                    },
+                                                    {
+                                                        "orderId": 11,
+                                                        "foodItems": [
+                                                            {
+                                                                "foodId": 10,
+                                                                "foodName": "Sticky Rice",
+                                                                "price": 22.0,
+                                                                "quantity": 5
+                                                            },
+                                                            {
+                                                                "foodId": 12,
+                                                                "foodName": "Pho",
+                                                                "price": 13.0,
+                                                                "quantity": 1
+                                                            }
+                                                        ],
+                                                        "restaurantId": 3,
+                                                        "restaurantName": "Restaurant C",
+                                                        "deliveryPartnerId": null,
+                                                        "totalPrice": 123.0
                                                     }
                                                 ]
                                             }
@@ -171,22 +217,47 @@ public class DeliveryPartnerController {
                                     schema = @Schema(implementation = SuccessResponse.class),
                                     examples = @ExampleObject(value = """
                                             {
-                                                "status": 200,
-                                                "message": "Delivering orders retrieved successfully",
-                                                "data": [
-                                                    {
-                                                        "id": 4,
-                                                        "quantity": 5,
-                                                        "price": 25.0,
-                                                        "orderTime": "2023-01-24 20:50",
-                                                        "deliveryTime": null,
-                                                        "status": "DELIVERING",
-                                                        "foodName": "Egg fried rice",
-                                                        "restaurantName": "Two Bears Restaurant",
-                                                        "deliveryPartnerName": "Quick Move Company"
-                                                    }
-                                                ]
-                                            }
+                                                   "status": 200,
+                                                   "message": "Delivering orders retrieved successfully",
+                                                   "data": [
+                                                       {
+                                                           "orderId": 9,
+                                                           "foodItems": [
+                                                               {
+                                                                   "foodId": 10,
+                                                                   "foodName": "Sticky Rice",
+                                                                   "price": 22.0,
+                                                                   "quantity": 5
+                                                               },
+                                                               {
+                                                                   "foodId": 12,
+                                                                   "foodName": "Pho",
+                                                                   "price": 13.0,
+                                                                   "quantity": 1
+                                                               }
+                                                           ],
+                                                           "restaurantId": 3,
+                                                           "restaurantName": "Restaurant C",
+                                                           "deliveryPartnerId": 13,
+                                                           "totalPrice": 123.0
+                                                       },
+                                                       {
+                                                           "orderId": 10,
+                                                           "foodItems": [
+                                                               {
+                                                                   "foodId": 5,
+                                                                   "foodName": "Extra Tips",
+                                                                   "price": 10.5,
+                                                                   "quantity": 3
+                                                               }
+                                                           ],
+                                                           "restaurantId": 1,
+                                                           "restaurantName": "Restaurant A",
+                                                           "deliveryPartnerId": 13,
+                                                           "totalPrice": 31.5
+                                                       }
+                                                   ]
+                                               }
                                             """)
 
                             )

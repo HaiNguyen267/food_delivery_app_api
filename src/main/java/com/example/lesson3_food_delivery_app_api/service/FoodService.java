@@ -27,10 +27,17 @@ public class FoodService {
     }
 
     public Food getFoodById(Long foodId) {
-        return foodRepository.findById(foodId).orElseThrow(() -> new NotFoundException("Food not found"));
+        return foodRepository.findById(foodId).orElseThrow(() -> new NotFoundException("Food not found for id: " + foodId));
     }
 
     public List<Food> getFoodsByNameContaining(String name) {
         return foodRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    public List<Food> getFoodsByIds(List<Long> foodIds) {
+        return foodIds.isEmpty() ? List.of()
+                : foodIds.stream()
+                .map(this::getFoodById)
+                .toList();
     }
 }

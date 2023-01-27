@@ -31,7 +31,7 @@ public class EventLog {
         RATE_FOOD,
 
         // delivery partner
-        DELIVERY_ORDER,
+        DELIVER_ORDER,
         FINISH_DELIVERY,
 
         // admin

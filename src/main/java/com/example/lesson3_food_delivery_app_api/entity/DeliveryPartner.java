@@ -26,11 +26,11 @@ public class DeliveryPartner extends User {
 
     @JsonIgnore
     @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private List<Order> deliveredOrders = new ArrayList<>();
+    private List<FoodOrder> deliveredOrders = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private List<Order> deliveringOrders = new ArrayList<>();
+    private List<FoodOrder> deliveringOrders = new ArrayList<>();
 
 
     public Double getDeliveryTimeAverage() {
@@ -39,7 +39,7 @@ public class DeliveryPartner extends User {
             return null;
         }
         return deliveredOrders.stream()
-                .map(Order::getTotalDeliveringTime)
+                .map(FoodOrder::getTotalDeliveringTime)
                 .mapToDouble(Long::doubleValue)
                 .average()
                 .orElse(0);
